@@ -25,6 +25,16 @@ public class Student {
     private String address;
     private String guardiansName;
     private LocalDateTime admissionDate;
+    @Column(unique = true)
+    private String studentId;
+
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
+    }
 
     public Long getId() {
         return id;

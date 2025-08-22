@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 public class StudentDTO {
 
-//    private Long id;
     private String name;
     private String phoneNumber;
     private String alternateNumber;

@@ -3,9 +3,12 @@ package com.ija.student_management_portal.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ija.student_management_portal.dto.StudentDTO;
 import com.ija.student_management_portal.entity.Student;
+import com.ija.student_management_portal.entity.StudentRollCounter;
 import com.ija.student_management_portal.repository.StudentRepository;
+import com.ija.student_management_portal.repository.StudentRollCounterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -23,7 +26,27 @@ public class StudentService {
     @Autowired
     private ObjectMapper objectmapper;
 
+    @Autowired
+    private StudentRollCounterRepository studentRollCounterRepository;
+
+    @Transactional
     public Optional<StudentDTO> saveStudent(StudentDTO studentDTO){
+
+        int admissionYear = studentDTO.getAdmissionDate().getYear();
+        StudentRollCounter counter = studentRollCounterRepository.findForUpdate(admissionYear)
+                .orElseGet(() -> {
+                    StudentRollCounter c = new StudentRollCounter();
+                    c.setAdmissionYear(admissionYear);
+                    c.setLastNumber(0);
+                    return studentRollCounterRepository.save(c);
+                });
+
+        counter.setLastNumber(counter.getLastNumber() + 1);
+        studentRollCounterRepository.saveAndFlush(counter);
+
+        String studentId = admissionYear + "-" + String.format("%04d", counter.getLastNumber());
+
+
         Student student = new Student();
         student.setName(studentDTO.getName());
         student.setStandard(studentDTO.getStandard());
@@ -32,6 +55,7 @@ public class StudentService {
         student.setAdmissionDate(studentDTO.getAdmissionDate());
         student.setPhoneNumber(studentDTO.getPhoneNumber());
         student.setAlternateNumber(studentDTO.getAlternateNumber());
+        student.setStudentId(studentId);
 
         Student studentEntity =  studentRepository.save(student);
         StudentDTO stdDTO =  objectmapper.convertValue(studentEntity,StudentDTO.class);
