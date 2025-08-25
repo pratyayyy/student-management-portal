@@ -1,19 +1,16 @@
 package com.ija.student_management_portal.dto;
 
+import lombok.Builder;
+
 import java.time.LocalDateTime;
 
+@Builder
 public class TransactionDTO {
     private Long id;
-    private LocalDateTime date;
+    private LocalDateTime transactionDate;
     private int amount;
-
-    public LocalDateTime getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDateTime date) {
-        this.date = date;
-    }
+    private String month;
+    private String studentId;
 
     public Long getId() {
         return id;
@@ -21,6 +18,14 @@ public class TransactionDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public LocalDateTime getTransactionDate() {
+        return transactionDate;
+    }
+
+    public void setTransactionDate(LocalDateTime transactionDate) {
+        this.transactionDate = transactionDate;
     }
 
     public int getAmount() {
@@ -31,13 +36,19 @@ public class TransactionDTO {
         this.amount = amount;
     }
 
-    public TransactionDTO(LocalDateTime date, Long id, int amount) {
-        this.date = date;
-        this.id = id;
-        this.amount = amount;
+    public String getMonth() {
+        return month;
     }
 
-    public TransactionDTO() {
+    public void setMonth(String month) {
+        this.month = month;
+    }
 
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
     }
 }

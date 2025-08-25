@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Students</title>
+    <link rel="stylesheet" th:href="@{/css/students.css}">
+</head>
+<body>
+<h1>Students</h1>
+
+<input type="text" id="searchInput" placeholder="Search students..." />
+
+<table id="studentTable">
+    <thead>
+    <tr>
+        <th onclick="sortTable(0)">Student ID</th>
+        <th onclick="sortTable(1)">Name</th>
+        <th onclick="sortTable(2)">Phone Number</th>
+        <th onclick="sortTable(3)">Alternate Number</th>
+        <th onclick="sortTable(4)">Guardian Name</th>
+        <th onclick="sortTable(5)">Standard</th>
+        <th onclick="sortTable(6)">Address</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="student : ${students}">
+        <td th:text="${student.studentId}" data-label="Student ID"></td>
+        <td th:text="${student.name}" data-label="Name"></td>
+        <td th:text="${student.phoneNumber}" data-label="Phone Number"></td>
+        <td th:text="${student.alternateNumber}" data-label="Alternate Number"></td>
+        <td th:text="${student.guardiansName}" data-label="Guardian Name"></td>
+        <td th:text="${student.standard}" data-label="Standard"></td>
+        <td th:text="${student.address}" data-label="Address"></td>
+    </tr>
+    </tbody>
+</table>
+
+<script th:src="@{/js/table.js}"></script>
+</body>
+</html>

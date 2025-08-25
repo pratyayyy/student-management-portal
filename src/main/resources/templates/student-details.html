@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Student Details</title>
+    <link rel="stylesheet" th:href="@{/css/student-details.css}">
+    <style>
+        body {
+            background-color: #f8f9fa; /* Light background */
+            color: #212529; /* Default text */
+            font-family: Arial, sans-serif;
+        }
+        .sidebar {
+            height: 100vh;
+            background-color: #ffffff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 220px;
+            padding-top: 20px;
+            border-right: 1px solid #ddd;
+        }
+        .sidebar h4 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .sidebar a {
+            display: block;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .sidebar a:hover {
+            background-color: #f1f1f1;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h4 class="text-center mb-4">Fees Management</h4>
+    <a th:href="@{/}">🏠 Home</a>
+    <a th:href="@{/students/add}">➕ Add Student</a>
+</div>
+
+<div class="container">
+    <h1>Student Details</h1>
+
+    <div class="card">
+        <div class="row">
+            <div class="col">
+                <p><strong>First Name:</strong>
+                    <span th:text="${#strings.arraySplit(student.name ?: '', ' ')[0] ?: ''}"></span>
+                </p>
+                <p><strong>Last Name:</strong>
+                    <span th:text="${#strings.arraySplit(student.name ?: '', ' ')[1] ?: ''}"></span>
+                </p>
+                <p><strong>Contact Number:</strong> <span th:text="${student.phoneNumber ?: ''}"></span></p>
+                <p><strong>Alternate Number:</strong> <span th:text="${student.alternateNumber ?: ''}"></span></p>
+            </div>
+            <div class="col">
+                <p><strong>Standard:</strong> <span th:text="${student.standard ?: ''}"></span></p>
+                <p><strong>Address:</strong> <span th:text="${student.address ?: ''}"></span></p>
+                <p><strong>Guardian's Name:</strong> <span th:text="${student.guardiansName ?: ''}"></span></p>
+<!--                <p><strong>Admission Date:</strong> <span th:text="${student.admissionDate ?: ''}"></span></p>-->
+<!--                <p><strong>Subjects:</strong> <span th:text="${student.subjects ?: ''}"></span></p>-->
+            </div>
+        </div>
+    </div>
+
+    <h2>Fee Transactions</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Month</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="txn : ${transactions}">
+            <td th:text="${txn.amount ?: ''}"></td>
+            <td th:text="${txn.transactionDate != null ? #temporals.format(txn.transactionDate, 'dd/MM/yyyy') : ''}"></td>
+            <td th:text="${txn.month != null ? #temporals.format(T(java.time.YearMonth).parse(txn.month), 'MMMM yyyy') : ''}"></td>
+        </tr>
+
+        </tbody>
+    </table>
+
+    <div class="buttons">
+        <a class="btn btn-success" th:href="@{/accept/{studentId}(studentId=${student.studentId})}">Accept Fees</a>
+        <a class="btn btn-secondary" th:href="@{/}">Back</a>
+    </div>
+</div>
+</body>
+</html>

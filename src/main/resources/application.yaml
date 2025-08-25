@@ -6,7 +6,7 @@ spring:
     name: StudentManagementProject
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/feesDb
+    url: jdbc:postgresql://postgres:5432/feesDb
     username: postgres
     password: 1234
     driver-class-name: org.postgresql.Driver

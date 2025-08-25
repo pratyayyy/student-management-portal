@@ -10,8 +10,15 @@ public class StudentDTO {
     private String standard;
     private String address;
     private String guardiansName;
-    private LocalDateTime admissionDate;
+    private String studentId;
 
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
+    }
 
     public String getName() {
         return name;
@@ -61,25 +68,16 @@ public class StudentDTO {
         this.guardiansName = guardiansName;
     }
 
-    public LocalDateTime getAdmissionDate() {
-        return admissionDate;
-    }
-
-    public void setAdmissionDate(LocalDateTime admissionDate) {
-        this.admissionDate = admissionDate;
-    }
 
 
 
-
-    public StudentDTO(String name, String phoneNumber, String alternateNumber, String standard, String address, String guardiansName, LocalDateTime admissionDate) {
+    public StudentDTO(String name, String phoneNumber, String alternateNumber, String standard, String address, String guardiansName) {
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.alternateNumber = alternateNumber;
         this.standard = standard;
         this.address = address;
         this.guardiansName = guardiansName;
-        this.admissionDate = admissionDate;
     }
 
     public StudentDTO() {
