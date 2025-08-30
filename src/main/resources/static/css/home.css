@@ -96,15 +96,29 @@ body, html {
 }
 
 /* Button */
+/* Make the last column (Actions) fixed width */
+.styled-table td:last-child,
+.styled-table th:last-child {
+  width: 120px;      /* adjust as needed */
+  text-align: center;
+}
+
+/* Button styling */
 .btn {
-    background-color: #1976d2;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 6px;
-    text-decoration: none;
-    transition: background-color 0.2s ease-in-out;
+  display: inline-block;
+  background-color: #007bff;  /* blue */
+  color: white;
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  white-space: nowrap;        /* prevent wrapping */
+  min-width: 100px;           /* keep all buttons same width */
+  text-align: center;
+  transition: background-color 0.2s ease;
 }
 
 .btn:hover {
-    background-color: #145ca4;
+  background-color: #0056b3;
 }
+
