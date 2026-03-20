@@ -2,97 +2,255 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Student Details</title>
+    <link rel="stylesheet" th:href="@{/css/navbar-sidebar.css}">
     <link rel="stylesheet" th:href="@{/css/student-details.css}">
     <style>
-        body {
-            background-color: #f8f9fa; /* Light background */
-            color: #212529; /* Default text */
-            font-family: Arial, sans-serif;
+        .detail-container {
+            max-width: 900px;
         }
-        .sidebar {
-            height: 100vh;
-            background-color: #ffffff;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 220px;
-            padding-top: 20px;
-            border-right: 1px solid #ddd;
-        }
-        .sidebar h4 {
-            text-align: center;
+
+        .detail-header {
             margin-bottom: 30px;
-            color: #333;
         }
-        .sidebar a {
-            display: block;
-            padding: 12px 20px;
+
+        .detail-header h1 {
+            font-size: 26px;
             color: #333;
+            margin-bottom: 8px;
+        }
+
+        .detail-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+
+        .card-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .info-group p {
+            margin: 12px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .info-group strong {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
             text-decoration: none;
-            font-weight: 500;
-            transition: background 0.2s;
+            display: inline-block;
+            text-align: center;
+            font-size: 14px;
         }
-        .sidebar a:hover {
-            background-color: #f1f1f1;
-            color: #000;
+
+        .btn-success {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .transactions-table thead {
+            background-color: #f8f9fa;
+        }
+
+        .transactions-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 2px solid #e0e0e0;
+            font-size: 13px;
+        }
+
+        .transactions-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .transactions-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .no-transactions {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-
-<div class="sidebar">
-    <h4 class="text-center mb-4">Fees Management</h4>
-    <a th:href="@{/}">🏠 Home</a>
-    <a th:href="@{/students/add}">➕ Add Student</a>
-</div>
-
-<div class="container">
-    <h1>Student Details</h1>
-
-    <div class="card">
-        <div class="row">
-            <div class="col">
-                <p><strong>First Name:</strong>
-                    <span th:text="${#strings.arraySplit(student.name ?: '', ' ')[0] ?: ''}"></span>
-                </p>
-                <p><strong>Last Name:</strong>
-                    <span th:text="${#strings.arraySplit(student.name ?: '', ' ')[1] ?: ''}"></span>
-                </p>
-                <p><strong>Contact Number:</strong> <span th:text="${student.phoneNumber ?: ''}"></span></p>
-                <p><strong>Alternate Number:</strong> <span th:text="${student.alternateNumber ?: ''}"></span></p>
-            </div>
-            <div class="col">
-                <p><strong>Standard:</strong> <span th:text="${student.standard ?: ''}"></span></p>
-                <p><strong>Address:</strong> <span th:text="${student.address ?: ''}"></span></p>
-                <p><strong>Guardian's Name:</strong> <span th:text="${student.guardiansName ?: ''}"></span></p>
-<!--                <p><strong>Admission Date:</strong> <span th:text="${student.admissionDate ?: ''}"></span></p>-->
-<!--                <p><strong>Subjects:</strong> <span th:text="${student.subjects ?: ''}"></span></p>-->
+<div class="layout-wrapper">
+    <!-- Top Navbar -->
+    <nav class="top-navbar">
+        <div class="navbar-left">
+            <h1 class="navbar-logo">📚 Fees Management System</h1>
+        </div>
+        <div class="navbar-right">
+            <div class="profile-section">
+                <div class="profile-avatar">👤</div>
+                <div class="profile-username" th:text="${username}"></div>
             </div>
         </div>
-    </div>
+    </nav>
 
-    <h2>Fee Transactions</h2>
-    <table>
-        <thead>
-        <tr>
-            <th>Amount</th>
-            <th>Date</th>
-            <th>Month</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="txn : ${transactions}">
-            <td th:text="${txn.amount ?: ''}"></td>
-            <td th:text="${txn.transactionDate != null ? #temporals.format(txn.transactionDate, 'dd/MM/yyyy') : ''}"></td>
-            <td th:text="${txn.month != null ? #temporals.format(T(java.time.YearMonth).parse(txn.month), 'MMMM yyyy') : ''}"></td>
-        </tr>
+    <div class="layout-body">
+        <!-- Sidebar -->
+        <aside class="layout-sidebar">
+            <div class="sidebar-container">
+                <ul class="sidebar-menu">
+                    <li><a th:href="@{/}">🏠 Home</a></li>
+                    <li><a th:href="@{/add}">➕ Add Student</a></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post" style="display: inline;">
+                            <button type="submit" class="sidebar-logout" style="border: none; background: none; cursor: pointer; width: 100%; text-align: left;">
+                                🚪 Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </aside>
 
-        </tbody>
-    </table>
+        <!-- Main Content -->
+        <section class="layout-content">
+            <div class="detail-container">
+                <div class="detail-header">
+                    <h1>Student Details</h1>
+                    <p>Complete information and transaction history</p>
+                </div>
 
-    <div class="buttons">
-        <a class="btn btn-success" th:href="@{/accept/{studentId}(studentId=${student.studentId})}">Accept Fees</a>
-        <a class="btn btn-secondary" th:href="@{/}">Back</a>
+                <!-- Student Information Card -->
+                <div class="card">
+                    <div class="card-header">📋 Personal Information</div>
+                    <div class="row">
+                        <div class="info-group">
+                            <p><strong>First Name:</strong>
+                                <span th:text="${#strings.arraySplit(student.name ?: '', ' ')[0] ?: 'N/A'}"></span>
+                            </p>
+                            <p><strong>Contact Number:</strong> <span th:text="${student.phoneNumber ?: 'N/A'}"></span></p>
+                            <p><strong>Standard:</strong> <span th:text="${student.standard ?: 'N/A'}"></span></p>
+                        </div>
+                        <div class="info-group">
+                            <p><strong>Last Name:</strong>
+                                <span th:text="${#strings.arraySplit(student.name ?: '', ' ')[1] ?: 'N/A'}"></span>
+                            </p>
+                            <p><strong>Alternate Number:</strong> <span th:text="${student.alternateNumber ?: 'N/A'}"></span></p>
+                            <p><strong>Guardian's Name:</strong> <span th:text="${student.guardiansName ?: 'N/A'}"></span></p>
+                        </div>
+                    </div>
+                    <div class="row full">
+                        <div class="info-group">
+                            <p><strong>Address:</strong> <span th:text="${student.address ?: 'N/A'}"></span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fee Transactions Card -->
+                <div class="card">
+                    <div class="card-header">💳 Fee Transactions</div>
+                    <div th:if="${transactions != null && transactions.size() > 0}">
+                        <table class="transactions-table">
+                            <thead>
+                            <tr>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Month</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="txn : ${transactions}">
+                                <td th:text="${'₹' + txn.amount}"></td>
+                                <td th:text="${txn.transactionDate != null ? #temporals.format(txn.transactionDate, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>
+                                <td th:text="${txn.month != null ? #temporals.format(T(java.time.YearMonth).parse(txn.month), 'MMMM yyyy') : 'N/A'}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div th:if="${transactions == null || transactions.size() == 0}" class="no-transactions">
+                        No transactions recorded yet
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="button-group">
+                    <a class="btn btn-success" th:href="@{/accept/{studentId}(studentId=${student.studentId})}">💰 Accept Fees</a>
+                    <a class="btn btn-secondary" th:href="@{/}">↩️ Back to Home</a>
+                </div>
+            </div>
+        </section>
     </div>
 </div>
 </body>

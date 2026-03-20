@@ -2,82 +2,230 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Add Student</title>
+    <link rel="stylesheet" th:href="@{/css/navbar-sidebar.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         body {
             background-color: #f5f7fa;
         }
+
         .form-container {
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 30px;
-            background: #f8f9fa;
+            background: white;
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
         }
+
         .form-header {
-            background-color: #1976d2;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 15px;
-            border-radius: 8px 8px 0 0;
-            margin: -30px -30px 20px -30px;
+            padding: 25px;
         }
-        .btn-primary {
-            background-color: #1976d2;
+
+        .form-header h2 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .form-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+            font-size: 14px;
+        }
+
+        .form-control {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-back {
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-back:hover {
+            background: #e0e0e0;
+        }
+
+        .form-wrapper {
+            max-width: 600px;
+            margin: 30px auto;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-body {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn-submit,
+            .btn-back {
+                width: 100%;
+                text-align: center;
+            }
         }
     </style>
 </head>
 <body>
+<div class="layout-wrapper">
+    <!-- Top Navbar -->
+    <nav class="top-navbar">
+        <div class="navbar-left">
+            <h1 class="navbar-logo">📚 Fees Management System</h1>
+        </div>
+        <div class="navbar-right">
+            <div class="profile-section">
+                <div class="profile-avatar">👤</div>
+                <div class="profile-username" th:text="${username}"></div>
+            </div>
+        </div>
+    </nav>
 
-<div class="form-container">
-    <div class="form-header">
-        <h4>Register New Student</h4>
+    <div class="layout-body">
+        <!-- Sidebar -->
+        <aside class="layout-sidebar">
+            <div class="sidebar-container">
+                <ul class="sidebar-menu">
+                    <li><a th:href="@{/}">🏠 Home</a></li>
+                    <li><a th:href="@{/add}" class="active">➕ Add Student</a></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post" style="display: inline;">
+                            <button type="submit" class="sidebar-logout" style="border: none; background: none; cursor: pointer; width: 100%; text-align: left;">
+                                🚪 Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <section class="layout-content">
+            <div class="form-wrapper">
+                <div class="form-container">
+                    <div class="form-header">
+                        <h2>➕ Register New Student</h2>
+                    </div>
+
+                    <div class="form-body">
+                        <form th:action="@{/students/add}" th:object="${student}" method="post">
+
+                            <!-- Student Name -->
+                            <div class="form-group">
+                                <label class="form-label">Student Name *</label>
+                                <input type="text" class="form-control" th:field="*{name}" placeholder="Enter student name" required>
+                            </div>
+
+                            <!-- Phone Numbers -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Phone Number *</label>
+                                    <input type="text" class="form-control" th:field="*{phoneNumber}" placeholder="Enter phone number" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Alternate Number</label>
+                                    <input type="text" class="form-control" th:field="*{alternateNumber}" placeholder="Enter alternate number">
+                                </div>
+                            </div>
+
+                            <!-- Standard -->
+                            <div class="form-group">
+                                <label class="form-label">Standard/Class *</label>
+                                <input type="text" class="form-control" th:field="*{standard}" placeholder="Enter class/standard" required>
+                            </div>
+
+                            <!-- Address -->
+                            <div class="form-group">
+                                <label class="form-label">Address *</label>
+                                <textarea class="form-control" rows="3" th:field="*{address}" placeholder="Enter address" required></textarea>
+                            </div>
+
+                            <!-- Guardian's Name -->
+                            <div class="form-group">
+                                <label class="form-label">Guardian's Name *</label>
+                                <input type="text" class="form-control" th:field="*{guardiansName}" placeholder="Enter guardian's name" required>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="button-group">
+                                <button type="submit" class="btn-submit">✅ Register Student</button>
+                                <a th:href="@{/}" class="btn-back">↩️ Back</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
-
-    <form th:action="@{/students/add}" th:object="${student}" method="post">
-
-        <!-- Student Name -->
-        <div class="mb-3">
-            <label class="form-label">Student Name*</label>
-            <input type="text" class="form-control" th:field="*{name}" required>
-        </div>
-
-        <!-- Phone Numbers -->
-        <div class="row mb-3">
-            <div class="col">
-                <label class="form-label">Phone Number*</label>
-                <input type="text" class="form-control" th:field="*{phoneNumber}" required>
-            </div>
-            <div class="col">
-                <label class="form-label">Alternate Number</label>
-                <input type="text" class="form-control" th:field="*{alternateNumber}">
-            </div>
-        </div>
-
-        <!-- Standard -->
-        <div class="mb-3">
-            <label class="form-label">Standard/Class*</label>
-            <input type="text" class="form-control" th:field="*{standard}" required>
-        </div>
-
-        <!-- Address -->
-        <div class="mb-3">
-            <label class="form-label">Address*</label>
-            <textarea class="form-control" rows="3" th:field="*{address}" required></textarea>
-        </div>
-
-        <!-- Guardian's Name -->
-        <div class="mb-3">
-            <label class="form-label">Guardian's Name*</label>
-            <input type="text" class="form-control" th:field="*{guardiansName}" required>
-        </div>
-
-        <div class="text-end">
-            <button type="submit" class="btn btn-primary">Register</button>
-        </div>
-    </form>
 </div>
+</body>
+</html>
 
 </body>
 </html>

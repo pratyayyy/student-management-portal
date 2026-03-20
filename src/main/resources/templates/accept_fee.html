@@ -2,40 +2,193 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Accept Fee</title>
+    <link rel="stylesheet" th:href="@{/css/navbar-sidebar.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f5f7fa;
+        }
+
+        .form-wrapper {
+            max-width: 500px;
+            margin: 30px auto;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+        }
+
+        .form-header h2 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .form-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+            font-size: 14px;
+        }
+
+        .form-control {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-cancel {
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            flex: 1;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-cancel:hover {
+            background: #e0e0e0;
+        }
+
+        @media (max-width: 768px) {
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn-submit,
+            .btn-cancel {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<div class="container mt-5">
-    <div class="card shadow-lg">
-        <div class="card-header bg-primary text-white">
-            <h4>Accept Fee</h4>
+<div class="layout-wrapper">
+    <!-- Top Navbar -->
+    <nav class="top-navbar">
+        <div class="navbar-left">
+            <h1 class="navbar-logo">📚 Fees Management System</h1>
         </div>
-        <div class="card-body">
-            <form th:action="@{/fees/accept}" th:object="${feePayment}" method="post">
-
-                <!-- Student ID (hidden) -->
-                <input type="hidden" th:field="*{studentId}" />
-
-                <!-- Amount -->
-                <div class="mb-3">
-                    <label class="form-label">Amount *</label>
-                    <input type="number" class="form-control" th:field="*{amount}" required/>
-                </div>
-
-                <!-- Fee Month -->
-                <div class="mb-3">
-                    <label class="form-label">Select Fee Month</label>
-                    <input type="month" class="form-control" th:field="*{feeMonth}" required/>
-                </div>
-
-                <!-- Buttons -->
-                <div class="d-flex justify-content-end">
-                    <a href="/" class="btn btn-secondary me-2">Cancel</a>
-                    <button type="submit" class="btn btn-success">Submit</button>
-                </div>
-            </form>
+        <div class="navbar-right">
+            <div class="profile-section">
+                <div class="profile-avatar">👤</div>
+                <div class="profile-username" th:text="${username}"></div>
+            </div>
         </div>
+    </nav>
+
+    <div class="layout-body">
+        <!-- Sidebar -->
+        <aside class="layout-sidebar">
+            <div class="sidebar-container">
+                <ul class="sidebar-menu">
+                    <li><a th:href="@{/}">🏠 Home</a></li>
+                    <li><a th:href="@{/add}">➕ Add Student</a></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post" style="display: inline;">
+                            <button type="submit" class="sidebar-logout" style="border: none; background: none; cursor: pointer; width: 100%; text-align: left;">
+                                🚪 Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <section class="layout-content">
+            <div class="form-wrapper">
+                <div class="form-container">
+                    <div class="form-header">
+                        <h2>💰 Accept Fee Payment</h2>
+                    </div>
+
+                    <div class="form-body">
+                        <form th:action="@{/fees/accept}" th:object="${feePayment}" method="post">
+
+                            <!-- Student ID (hidden) -->
+                            <input type="hidden" th:field="*{studentId}" />
+
+                            <!-- Amount -->
+                            <div class="form-group">
+                                <label class="form-label">Amount (₹) *</label>
+                                <input type="number" class="form-control" th:field="*{amount}" placeholder="Enter amount" required/>
+                            </div>
+
+                            <!-- Fee Month -->
+                            <div class="form-group">
+                                <label class="form-label">Select Fee Month *</label>
+                                <input type="month" class="form-control" th:field="*{feeMonth}" required/>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="button-group">
+                                <button type="submit" class="btn-submit">✅ Submit Payment</button>
+                                <a th:href="@{/}" class="btn-cancel">↩️ Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
 </div>
 

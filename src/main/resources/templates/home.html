@@ -2,58 +2,97 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Fees Management System</title>
+    <link rel="stylesheet" th:href="@{/css/navbar-sidebar.css}">
     <link rel="stylesheet" th:href="@{/css/home.css}">
+    <style>
+        .dashboard-header {
+            margin-bottom: 30px;
+        }
+
+        .dashboard-header h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-header p {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-
+<div class="layout-wrapper">
     <!-- Top Navbar -->
-    <header class="navbar">
-        <div class="logo">Fees Management System</div>
-    </header>
+    <nav class="top-navbar">
+        <div class="navbar-left">
+            <h1 class="navbar-logo">📚 Fees Management System</h1>
+        </div>
+        <div class="navbar-right">
+            <div class="profile-section">
+                <div class="profile-avatar">👤</div>
+                <div class="profile-username" th:text="${username}"></div>
+            </div>
+        </div>
+    </nav>
 
-    <div class="main-content">
+    <div class="layout-body">
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <ul>
-                <li><a th:href="@{/}">🏠 Home</a></li>
-                <li><a th:href="@{/add}">➕ Add Student</a></li>
-            </ul>
+        <aside class="layout-sidebar">
+            <div class="sidebar-container">
+                <ul class="sidebar-menu">
+                    <li><a th:href="@{/}" class="active">🏠 Home</a></li>
+                    <li><a th:href="@{/add}">➕ Add Student</a></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post" style="display: inline;">
+                            <button type="submit" class="sidebar-logout" style="border: none; background: none; cursor: pointer; width: 100%; text-align: left;">
+                                🚪 Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
         </aside>
 
-        <!-- Page Content -->
-        <section class="content">
-            <h1>Manage Students</h1>
-            <table class="styled-table">
-                <thead>
-                <tr>
-                    <th>Student Id</th>
-                    <th>Name</th>
-                    <th>Contact Number</th>
-                    <th>Alternate Number</th>
-                    <th>Standard</th>
-                    <th>Address</th>
-                    <th>Guardians Name</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="student : ${students}">
-                    <td th:text="${student.studentId}"></td>
-                    <td th:text="${student.name}"></td>
-                    <td th:text="${student.phoneNumber}"></td>
-                    <td th:text="${student.alternateNumber}"></td>
-                    <td th:text="${student.standard}"></td>
-                    <td th:text="${student.address}"></td>
-                    <td th:text="${student.guardiansName}"></td>
-                    <td>
-                        <a class="btn" th:href="@{/students/{id}(id=${student.studentId})}">
-                            View Details
-                        </a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+        <!-- Main Content -->
+        <section class="layout-content">
+            <div class="container">
+                <div class="dashboard-header">
+                    <h1>Manage Students</h1>
+                    <p>View and manage all registered students</p>
+                </div>
+
+                <table class="styled-table">
+                    <thead>
+                    <tr>
+                        <th>Student Id</th>
+                        <th>Name</th>
+                        <th>Contact Number</th>
+                        <th>Alternate Number</th>
+                        <th>Standard</th>
+                        <th>Address</th>
+                        <th>Guardians Name</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="student : ${students}">
+                        <td th:text="${student.studentId}"></td>
+                        <td th:text="${student.name}"></td>
+                        <td th:text="${student.phoneNumber}"></td>
+                        <td th:text="${student.alternateNumber}"></td>
+                        <td th:text="${student.standard}"></td>
+                        <td th:text="${student.address}"></td>
+                        <td th:text="${student.guardiansName}"></td>
+                        <td>
+                            <a class="btn" th:href="@{/students/{id}(id=${student.studentId})}">
+                                View Details
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </section>
     </div>
 </div>

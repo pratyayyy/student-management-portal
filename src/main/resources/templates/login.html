@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .login-header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 30px;
+            margin: 0 auto 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .error-message {
+            background-color: #fee;
+            color: #c33;
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border-left: 4px solid #c33;
+        }
+
+        .success-message {
+            background-color: #efe;
+            color: #3c3;
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border-left: 4px solid #3c3;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .footer-text a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        .info-box {
+            background-color: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .demo-credentials {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #eee;
+        }
+
+        .demo-credentials p {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .demo-credentials small {
+            display: block;
+            color: #999;
+            margin: 4px 0;
+        }
+
+        .toggle-section {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .toggle-link {
+            color: #667eea;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .toggle-link:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .register-form {
+            display: none;
+        }
+
+        .register-form.active {
+            display: block;
+        }
+
+        .login-form.hidden {
+            display: none;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            background-color: white;
+            color: #333;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .register-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .register-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .register-btn:active {
+            transform: translateY(0);
+        }
+
+        .success-registration {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .register-note {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="logo">📚</div>
+            <h1>Student Portal</h1>
+            <p id="header-subtitle">Welcome Back</p>
+        </div>
+
+        <!-- Success Registration Message -->
+        <div th:if="${param.registered}" class="success-registration">
+            <strong>✓ Registration Successful!</strong> Your account has been created. You can now login with your credentials.
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${param.error}" class="error-message">
+            <strong>Login Failed!</strong> Invalid username or password. Please try again.
+        </div>
+
+        <!-- Registration Error Message -->
+        <div th:if="${param.regError}" class="error-message">
+            <strong>Registration Failed!</strong> <span th:text="${param.regError}"></span>
+        </div>
+
+        <!-- Logout Message -->
+        <div th:if="${param.logout}" class="success-message">
+            <strong>Logged Out Successfully!</strong> You have been logged out.
+        </div>
+
+
+        <!-- LOGIN FORM -->
+        <!-- Spring Security processes POST /login and redirects to /login-success on success -->
+        <form id="login-form" th:action="@{/login}" method="post" class="login-form">
+            <div class="info-box">
+                ℹ️ Please enter your credentials to login to your account.
+            </div>
+
+            <div class="form-group">
+                <label for="login-username">Username</label>
+                <input type="text"
+                       id="login-username"
+                       name="username"
+                       placeholder="Enter your username"
+                       required
+                       autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="login-password">Password</label>
+                <input type="password"
+                       id="login-password"
+                       name="password"
+                       placeholder="Enter your password"
+                       required>
+            </div>
+
+
+            <button type="submit" class="login-btn">
+                🔐 Login
+            </button>
+        </form>
+
+        <!-- REGISTRATION FORM -->
+        <form id="register-form" th:action="@{/register}" method="post" class="register-form">
+            <div class="register-note">
+                📝 Create a new account by filling in the details below.
+            </div>
+
+            <div class="form-group">
+                <label for="reg-username">Username</label>
+                <input type="text"
+                       id="reg-username"
+                       name="username"
+                       placeholder="Choose a username"
+                       required
+                       minlength="3">
+            </div>
+
+            <div class="form-group">
+                <label for="reg-password">Password</label>
+                <input type="password"
+                       id="reg-password"
+                       name="password"
+                       placeholder="Enter a strong password"
+                       required
+                       minlength="6">
+            </div>
+
+            <div class="form-group">
+                <label for="reg-confirm-password">Confirm Password</label>
+                <input type="password"
+                       id="reg-confirm-password"
+                       name="confirmPassword"
+                       placeholder="Confirm your password"
+                       required
+                       minlength="6">
+            </div>
+
+            <div class="form-group">
+                <label for="role-select">Select Role</label>
+                <select id="role-select" name="role" required>
+                    <option value="">-- Select a Role --</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="STUDENT">Student</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="student-id-field" style="display: none;">
+                <label for="student-id">Student ID (for Student role)</label>
+                <input type="text"
+                       id="student-id"
+                       name="studentId"
+                       placeholder="Enter your student ID (e.g., 2024-0001)">
+            </div>
+
+            <button type="submit" class="register-btn">
+                ✨ Create Account
+            </button>
+        </form>
+
+        <!-- Toggle Between Login and Register -->
+        <div class="toggle-section">
+            <span id="toggle-text">Don't have an account? </span>
+            <a onclick="toggleForms()" class="toggle-link">
+                <span id="toggle-link-text">Register here</span>
+            </a>
+        </div>
+
+        <div class="footer-text">
+            For assistance, please contact the administration.
+        </div>
+    </div>
+
+    <script>
+        function toggleForms() {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const headerSubtitle = document.getElementById('header-subtitle');
+            const toggleText = document.getElementById('toggle-text');
+            const toggleLinkText = document.getElementById('toggle-link-text');
+
+            loginForm.classList.toggle('hidden');
+            registerForm.classList.toggle('active');
+
+            if (registerForm.classList.contains('active')) {
+                headerSubtitle.textContent = 'Create Account';
+                toggleText.textContent = 'Already have an account? ';
+                toggleLinkText.textContent = 'Login here';
+            } else {
+                headerSubtitle.textContent = 'Welcome Back';
+                toggleText.textContent = "Don't have an account? ";
+                toggleLinkText.textContent = 'Register here';
+            }
+        }
+
+        // Show/hide student ID field based on role selection
+        document.getElementById('role-select').addEventListener('change', function() {
+            const studentIdField = document.getElementById('student-id-field');
+            if (this.value === 'STUDENT') {
+                studentIdField.style.display = 'block';
+                document.getElementById('student-id').required = true;
+            } else {
+                studentIdField.style.display = 'none';
+                document.getElementById('student-id').required = false;
+                document.getElementById('student-id').value = '';
+            }
+        });
+
+        // Validate password match on register form
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm-password').value;
+
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+            }
+        });
+    </script>
+</body>
+</html>
