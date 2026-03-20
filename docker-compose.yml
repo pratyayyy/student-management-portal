@@ -1,13 +1,13 @@
 version: "3.8"
 services:
-  springboot-app:
+  feepay:
     image: student-management-backend:latest
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
-      - "5005:5005"   # Debug port exposed
+      - "5005:5005"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/feesDb
       SPRING_DATASOURCE_USERNAME: postgres
