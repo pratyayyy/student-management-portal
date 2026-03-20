@@ -95,7 +95,7 @@ The **Student Management Portal** is a full-stack web application designed for e
               ↓ HTTP/HTTPS via Caddy ↓
 ┌─────────────────────────────────────────────────────────────┐
 │              Reverse Proxy Layer (Caddy)                    │
-│         Routing: smp.localhost → localhost:8080             │
+│         Routing: edumanage.localhost → localhost:8080             │
 └─────────────────────────────────────────────────────────────┘
               ↓ HTTP ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -325,12 +325,12 @@ The `docker-compose.yml` provides two services:
 
 ### Accessing the Application
 
-| Service | URL | Notes |
-|---------|-----|-------|
-| **Web Application** | http://localhost:8080 | Main application |
-| **Reverse Proxy (Caddy)** | http://smp.localhost | If Caddy is configured |
-| **PostgreSQL** | localhost:5433 | Database connection |
-| **Debug Port** | localhost:5005 | For remote debugging |
+| Service | URL                                   | Notes |
+|---------|---------------------------------------|-------|
+| **Web Application** | http://localhost:8080                 | Main application |
+| **Reverse Proxy (Caddy)** | https://edumanage.localhost           | If Caddy is configured |
+| **PostgreSQL** | localhost:5433                        | Database connection |
+| **Debug Port** | localhost:5005                        | For remote debugging |
 | **API Docs** | http://localhost:8080/swagger-ui.html | OpenAPI documentation |
 
 ### Database Initialization
