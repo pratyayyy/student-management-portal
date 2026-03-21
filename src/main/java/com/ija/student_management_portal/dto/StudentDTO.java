@@ -1,7 +1,10 @@
 package com.ija.student_management_portal.dto;
 
+import lombok.Builder;
+
 import java.time.LocalDateTime;
 
+@Builder
 public class StudentDTO {
 
     private String name;
@@ -72,6 +75,16 @@ public class StudentDTO {
 
 
     public StudentDTO(String name, String phoneNumber, String alternateNumber, String standard, String address, String guardiansName) {
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.alternateNumber = alternateNumber;
+        this.standard = standard;
+        this.address = address;
+        this.guardiansName = guardiansName;
+    }
+
+    public StudentDTO(String studentId, String name, String phoneNumber, String alternateNumber, String standard, String address, String guardiansName) {
+        this.studentId = studentId;
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.alternateNumber = alternateNumber;
