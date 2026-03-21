@@ -2,7 +2,10 @@ package com.ija.student_management_portal.service;
 
 import com.ija.student_management_portal.dto.BulkImportResult;
 import com.ija.student_management_portal.dto.StudentDTO;
+import com.ija.student_management_portal.dto.StudentRowModel;
+import com.ija.student_management_portal.entity.StudentRollCounter;
 import com.ija.student_management_portal.repository.StudentRepository;
+import com.ija.student_management_portal.repository.StudentRollCounterRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +23,9 @@ public class BulkImportService {
 
     @Autowired
     private StudentService studentService;
+
+    @Autowired
+    private StudentRollCounterRepository studentRollCounterRepository;
 
     @Autowired
     private StudentRepository studentRepository;
@@ -50,7 +57,7 @@ public class BulkImportService {
             }
 
             // Parse Excel file
-            List<StudentDTO> students = ExcelParserService.parseExcelFile(file);
+            List<StudentRowModel> students = ExcelParserService.parseExcelFile(file);
 
             if (students.isEmpty()) {
                 errors.add("No valid student records found in the file");
@@ -62,7 +69,7 @@ public class BulkImportService {
 
             // Import each student
             for (int i = 0; i < students.size(); i++) {
-                StudentDTO student = students.get(i);
+                StudentRowModel student = students.get(i);
                 int rowNumber = i + 2; // +2 because row 1 is header and row numbers are 1-based
 
                 try {
@@ -72,7 +79,9 @@ public class BulkImportService {
                     if (!validationErrors.isEmpty()) {
                         failedImports++;
                         errors.addAll(validationErrors);
-                        log.warn("Validation failed for row {}: {}", rowNumber, validationErrors);
+                        log.warn("Validation failed for row {}: {} - Student data: name='{}', phone='{}', standard='{}', address='{}', guardian='{}'",
+                            rowNumber, validationErrors, student.getName(), student.getPhoneNumber(),
+                            student.getStandard(), student.getAddress(), student.getGuardiansName());
                         continue;
                     }
 
@@ -87,7 +96,7 @@ public class BulkImportService {
                     }
 
                     // Save student
-                    studentService.saveStudent(student);
+                    studentService.saveStudent(convertRowObjToDbObj(student));
                     successfulImports++;
                     log.info("Successfully imported student: {} (Row {})", student.getName(), rowNumber);
 
@@ -127,6 +136,34 @@ public class BulkImportService {
             log.error(errorMsg, e);
             return buildFailureResult(0, 0, errors, "Import failed");
         }
+    }
+
+    private StudentDTO convertRowObjToDbObj(StudentRowModel student) {
+        StudentDTO studentDTO = new StudentDTO();
+        studentDTO.setName(student.getName());
+        studentDTO.setPhoneNumber(student.getPhoneNumber());
+        studentDTO.setAlternateNumber(student.getAlternateNumber());
+        studentDTO.setStandard(student.getStandard());
+        studentDTO.setAddress(student.getAddress());
+        studentDTO.setGuardiansName(student.getGuardiansName());
+
+        int admissionYear = LocalDateTime.now().getYear();
+        StudentRollCounter counter = studentRollCounterRepository.findForUpdate(admissionYear)
+                .orElseGet(() -> {
+                    StudentRollCounter c = new StudentRollCounter();
+                    c.setAdmissionYear(admissionYear);
+                    c.setLastNumber(0);
+                    return studentRollCounterRepository.save(c);
+                });
+
+        counter.setLastNumber(counter.getLastNumber() + 1);
+        studentRollCounterRepository.saveAndFlush(counter);
+
+        String studentId = admissionYear + "-" + String.format("%04d", counter.getLastNumber());
+
+        studentDTO.setStudentId(studentId);
+
+        return studentDTO;
     }
 
     /**

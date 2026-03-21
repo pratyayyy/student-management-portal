@@ -430,7 +430,7 @@ Jane Smith         | 8765432109   | 8765432108  | 9        | 456 Oak Ave     | M
 
                         <p style="margin: 15px 0; color: #333; font-weight: 500;" th:text="${importResult.message}"></p>
 
-                        <div th:if="${importResult.errors and importResult.errors.size() > 0}">
+                        <div th:if="${importResult.errors != null and importResult.errors.size() > 0}">
                             <h4 style="margin-top: 20px; margin-bottom: 10px; color: #333;">📝 Details:</h4>
                             <div class="error-list">
                                 <div th:each="error : ${importResult.errors}" class="error-item">

@@ -2,6 +2,7 @@ package com.ija.student_management_portal.service;
 
 import com.ija.student_management_portal.dto.BulkImportResult;
 import com.ija.student_management_portal.dto.StudentDTO;
+import com.ija.student_management_portal.dto.StudentRowModel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -18,8 +19,8 @@ public class ExcelParserService {
      * Parse Excel file and extract student data
      * Expected columns: Name | Phone Number | Alternate Number | Standard | Address | Guardians Name
      */
-    public static List<StudentDTO> parseExcelFile(MultipartFile file) throws IOException {
-        List<StudentDTO> students = new ArrayList<>();
+    public static List<StudentRowModel> parseExcelFile(MultipartFile file) throws IOException {
+        List<StudentRowModel> students = new ArrayList<>();
 
         try (InputStream inputStream = file.getInputStream();
              Workbook workbook = new XSSFWorkbook(inputStream)) {
@@ -35,7 +36,7 @@ public class ExcelParserService {
                 }
 
                 try {
-                    StudentDTO student = extractStudentFromRow(row);
+                    StudentRowModel student = extractStudentFromRow(row);
                     if (student != null) {
                         students.add(student);
                     }
@@ -52,7 +53,7 @@ public class ExcelParserService {
      * Extract student data from a single row
      * Expected order: Name(0) | Phone(1) | Alternate(2) | Standard(3) | Address(4) | Guardian(5)
      */
-    private static StudentDTO extractStudentFromRow(Row row) {
+    private static StudentRowModel extractStudentFromRow(Row row) {
         try {
             String name = getCellValueAsString(row.getCell(0));
             String phone = getCellValueAsString(row.getCell(1));
@@ -61,20 +62,27 @@ public class ExcelParserService {
             String address = getCellValueAsString(row.getCell(4));
             String guardian = getCellValueAsString(row.getCell(5));
 
+            // Debug logging to troubleshoot guardian name issue
+            if (name != null && !name.isEmpty()) {
+                log.debug("Extracted row - Name: '{}', Phone: '{}', Guardian: '{}'",
+                    name, phone, guardian);
+            }
+
             // Validate required fields
             if (name == null || name.trim().isEmpty() ||
                 phone == null || phone.trim().isEmpty()) {
                 return null;
             }
 
-            return StudentDTO.builder()
-                    .name(name.trim())
-                    .phoneNumber(phone.trim())
-                    .alternateNumber(alternate != null ? alternate.trim() : "")
-                    .standard(standard != null ? standard.trim() : "")
-                    .address(address != null ? address.trim() : "")
-                    .guardiansName(guardian != null ? guardian.trim() : "")
-                    .build();
+            StudentRowModel studentRowObj = new StudentRowModel();
+            studentRowObj.setName(name);
+            studentRowObj.setPhoneNumber(phone);
+            studentRowObj.setAlternateNumber(alternate);
+            studentRowObj.setStandard(standard);
+            studentRowObj.setAddress(address);
+            studentRowObj.setGuardiansName(guardian);
+
+            return studentRowObj;
         } catch (Exception e) {
             log.warn("Error extracting student from row: {}", e.getMessage());
             return null;
@@ -89,21 +97,45 @@ public class ExcelParserService {
             return null;
         }
 
-        switch (cell.getCellType()) {
-            case STRING:
-                return cell.getStringCellValue();
-            case NUMERIC:
-                if (DateUtil.isCellDateFormatted(cell)) {
-                    return cell.getDateCellValue().toString();
-                }
-                return String.valueOf((long) cell.getNumericCellValue());
-            case BOOLEAN:
-                return String.valueOf(cell.getBooleanCellValue());
-            case FORMULA:
-                return cell.getCellFormula();
-            case BLANK:
-            default:
-                return null;
+        try {
+            switch (cell.getCellType()) {
+                case STRING:
+                    String value = cell.getStringCellValue();
+                    return (value != null) ? value.trim() : null;
+                case NUMERIC:
+                    // Check if it's a date
+                    if (DateUtil.isCellDateFormatted(cell)) {
+                        return cell.getDateCellValue().toString().trim();
+                    }
+                    // For numeric values, convert to string
+                    double numValue = cell.getNumericCellValue();
+                    // Check if it's an integer
+                    if (numValue == Math.floor(numValue)) {
+                        return String.valueOf((long) numValue).trim();
+                    } else {
+                        return String.valueOf(numValue).trim();
+                    }
+                case BOOLEAN:
+                    return String.valueOf(cell.getBooleanCellValue()).trim();
+                case FORMULA:
+                    // Try to get the cached value first
+                    try {
+                        return cell.getStringCellValue().trim();
+                    } catch (Exception e) {
+                        // If it's a numeric formula result
+                        double formulaResult = cell.getNumericCellValue();
+                        if (formulaResult == Math.floor(formulaResult)) {
+                            return String.valueOf((long) formulaResult).trim();
+                        }
+                        return String.valueOf(formulaResult).trim();
+                    }
+                case BLANK:
+                default:
+                    return null;
+            }
+        } catch (Exception e) {
+            log.warn("Error converting cell value to string: {}", e.getMessage());
+            return null;
         }
     }
 
@@ -127,7 +159,7 @@ public class ExcelParserService {
     /**
      * Validate student data
      */
-    public static List<String> validateStudent(StudentDTO student, int rowNumber) {
+    public static List<String> validateStudent(StudentRowModel student, int rowNumber) {
         List<String> errors = new ArrayList<>();
 
         if (student.getName() == null || student.getName().trim().isEmpty()) {
