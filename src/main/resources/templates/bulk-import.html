@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Import Students</title>
+    <link rel="stylesheet" th:href="@{/css/navbar-sidebar.css}">
+    <style>
+        body {
+            background-color: #f5f7fa;
+        }
+
+        .import-container {
+            max-width: 900px;
+            margin: 30px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .import-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+        }
+
+        .import-header h2 {
+            margin: 0 0 10px 0;
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .import-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .import-body {
+            padding: 40px;
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 40px;
+            transition: all 0.3s;
+        }
+
+        .upload-section:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-section.dragover {
+            border-color: #764ba2;
+            background: #e8ebf6;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .upload-text h3 {
+            margin: 15px 0 10px 0;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .upload-text p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .file-name-display {
+            margin-top: 15px;
+            padding: 10px 15px;
+            background: white;
+            border-radius: 6px;
+            color: #667eea;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-back {
+            background: #f0f0f0;
+            color: #333;
+            flex: 1;
+        }
+
+        .btn-back:hover {
+            background: #e0e0e0;
+        }
+
+        .template-section {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+        }
+
+        .template-section h4 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .template-text {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+
+        /* Import Result Styles */
+        .result-container {
+            margin-top: 30px;
+        }
+
+        .result-card {
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-success {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+        }
+
+        .result-failure {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+
+        .result-mixed {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+        }
+
+        .result-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 15px 0;
+        }
+
+        .result-success .result-title {
+            color: #2e7d32;
+        }
+
+        .result-failure .result-title {
+            color: #c62828;
+        }
+
+        .result-mixed .result-title {
+            color: #e65100;
+        }
+
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        .error-list {
+            background: white;
+            border-radius: 6px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .error-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .error-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .import-container {
+                margin: 20px;
+            }
+
+            .import-body {
+                padding: 20px;
+            }
+
+            .upload-section {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="layout-wrapper">
+    <!-- Top Navbar -->
+    <nav class="top-navbar">
+        <div class="navbar-left">
+            <h1 class="navbar-logo">📚 Fees Management System</h1>
+        </div>
+        <div class="navbar-right">
+            <div class="profile-section">
+                <div class="profile-avatar">👤</div>
+                <div class="profile-username" th:text="${username}"></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="layout-body">
+        <!-- Sidebar -->
+        <aside class="layout-sidebar">
+            <div class="sidebar-container">
+                <ul class="sidebar-menu">
+                    <li><a th:href="@{/}">🏠 Home</a></li>
+                    <li><a th:href="@{/add}">➕ Add Student</a></li>
+                    <li><a th:href="@{/bulk-import}" class="active">📊 Bulk Import</a></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post" style="display: inline;">
+                            <button type="submit" class="sidebar-logout" style="border: none; background: none; cursor: pointer; width: 100%; text-align: left;">
+                                🚪 Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <section class="layout-content">
+            <div class="import-container">
+                <div class="import-header">
+                    <h2>📊 Bulk Import Students</h2>
+                    <p>Upload an Excel file to import multiple students at once</p>
+                </div>
+
+                <div class="import-body">
+                    <!-- Template Information -->
+                    <div class="form-section">
+                        <div class="section-title">📋 Required Excel Format</div>
+                        <div class="template-section">
+                            <h4>Expected Columns (in order):</h4>
+                            <div class="template-text">Column A: Student Name (Required)
+Column B: Phone Number (Required, 10 digits)
+Column C: Alternate Number (Optional)
+Column D: Standard/Class (Required)
+Column E: Address (Required)
+Column F: Guardian's Name (Required)
+
+Example:
+Name                | Phone Number | Alternate   | Standard | Address        | Guardians Name
+John Doe           | 9876543210   | 9876543211  | 10       | 123 Main St     | Mr. Doe
+Jane Smith         | 8765432109   | 8765432108  | 9        | 456 Oak Ave     | Mrs. Smith</div>
+                        </div>
+                    </div>
+
+                    <!-- File Upload Section -->
+                    <div class="form-section">
+                        <div class="section-title">📁 Upload File</div>
+                        <form th:action="@{/bulk-import/upload}" method="post" enctype="multipart/form-data" id="uploadForm">
+                            <div class="upload-section" id="uploadArea">
+                                <div class="upload-icon">📤</div>
+                                <div class="upload-text">
+                                    <h3>Drag & Drop Your Excel File Here</h3>
+                                    <p>or click below to select a file</p>
+                                </div>
+                                <div class="file-input-wrapper">
+                                    <input type="file" id="fileInput" name="file" accept=".xlsx,.xls" onchange="updateFileName(this)">
+                                    <label for="fileInput" class="file-input-label">📂 Browse Files</label>
+                                </div>
+                                <div class="file-name-display" id="fileName" style="display: none;"></div>
+                            </div>
+
+                            <div class="button-group">
+                                <button type="submit" class="btn btn-submit" id="submitBtn">
+                                    ✅ Import Students
+                                </button>
+                                <a th:href="@{/}" class="btn btn-back">↩️ Back</a>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Import Result -->
+                    <div th:if="${importResult}" class="result-container">
+                        <div th:if="${importResult.success}" class="result-card result-success">
+                            <h3 class="result-title">✅ Import Successful!</h3>
+                        </div>
+                        <div th:if="${!importResult.success and importResult.totalRecords > 0}" class="result-card result-mixed">
+                            <h3 class="result-title">⚠️ Partial Import Completed</h3>
+                        </div>
+                        <div th:if="${!importResult.success and importResult.totalRecords == 0}" class="result-card result-failure">
+                            <h3 class="result-title">❌ Import Failed</h3>
+                        </div>
+
+                        <div class="result-stats">
+                            <div class="stat-item">
+                                <div class="stat-value" th:text="${importResult.totalRecords}"></div>
+                                <div class="stat-label">Total Records</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" style="color: #4caf50;" th:text="${importResult.successfulImports}"></div>
+                                <div class="stat-label">Successful</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" style="color: #f44336;" th:text="${importResult.failedImports}"></div>
+                                <div class="stat-label">Failed</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" style="color: #2196f3;" th:text="${importResult.importTimestampMillis} + 'ms'"></div>
+                                <div class="stat-label">Time Taken</div>
+                            </div>
+                        </div>
+
+                        <p style="margin: 15px 0; color: #333; font-weight: 500;" th:text="${importResult.message}"></p>
+
+                        <div th:if="${importResult.errors and importResult.errors.size() > 0}">
+                            <h4 style="margin-top: 20px; margin-bottom: 10px; color: #333;">📝 Details:</h4>
+                            <div class="error-list">
+                                <div th:each="error : ${importResult.errors}" class="error-item">
+                                    • <span th:text="${error}"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    // File input change
+    function updateFileName(input) {
+        const fileDisplay = document.getElementById('fileName');
+        if (input.files && input.files[0]) {
+            fileDisplay.textContent = '📄 ' + input.files[0].name + ' (' + formatFileSize(input.files[0].size) + ')';
+            fileDisplay.style.display = 'block';
+        }
+    }
+
+    // Format file size
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    // Drag and drop
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            fileInput.files = e.dataTransfer.files;
+            updateFileName(fileInput);
+        }
+    });
+
+    // Form submission
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+        if (!fileInput.files || !fileInput.files[0]) {
+            e.preventDefault();
+            alert('Please select a file first');
+            return false;
+        }
+    });
+</script>
+</body>
+</html>
