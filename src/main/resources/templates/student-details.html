@@ -3,78 +3,228 @@
 <head>
     <title>Student Details</title>
     <link rel="stylesheet" th:href="@{/css/navbar-sidebar.css}">
-    <link rel="stylesheet" th:href="@{/css/student-details.css}">
     <style>
+        /* ── Page chrome ─────────────────────────────────────── */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ── Content area ────────────────────────────────────── */
         .detail-container {
-            max-width: 900px;
+            max-width: 1100px;
+            padding: 30px 20px;
         }
 
-        .detail-header {
-            margin-bottom: 30px;
+        .detail-header { margin-bottom: 28px; }
+        .detail-header h1 { font-size: 26px; color: #333; margin: 0 0 6px; }
+        .detail-header p  { color: #666; font-size: 14px; margin: 0; }
+
+        /* ── Cards ───────────────────────────────────────────── */
+        .sd-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 28px 32px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 28px;
         }
 
-        .detail-header h1 {
-            font-size: 26px;
+        .sd-card-header {
+            font-size: 17px;
+            font-weight: 700;
             color: #333;
-            margin-bottom: 8px;
-        }
-
-        .detail-header p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            margin-bottom: 25px;
-        }
-
-        .card-header {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 20px;
+            margin-bottom: 22px;
             padding-bottom: 12px;
             border-bottom: 2px solid #f0f0f0;
         }
 
-        .row {
+        /* ── Top section: info (left) + picture (right) ──────── */
+        .info-picture-grid {
+            display: grid;
+            grid-template-columns: 1fr 240px;
+            gap: 36px;
+            align-items: start;
+        }
+
+        /* Student fields inside left column */
+        .info-fields-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 4px 24px;
         }
 
-        .row.full {
-            grid-template-columns: 1fr;
-        }
-
-        .info-group p {
-            margin: 12px 0;
+        .info-field {
+            padding: 9px 0;
             font-size: 14px;
+            color: #555;
             line-height: 1.6;
+            border-bottom: 1px solid #f5f5f5;
         }
 
-        .info-group strong {
+        .info-field.full-width { grid-column: 1 / -1; }
+
+        .info-field strong {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             color: #667eea;
-            font-weight: 600;
+            font-weight: 700;
+            margin-bottom: 2px;
         }
 
-        .button-group {
+        /* ── Profile picture column ──────────────────────────── */
+        .profile-picture-col {
             display: flex;
-            gap: 12px;
-            margin-top: 25px;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
         }
 
-        .btn {
-            padding: 10px 20px;
-            border-radius: 6px;
+        .profile-picture-frame {
+            width: 200px;
+            height: 200px;
+            border: 3px solid #667eea;
+            border-radius: 14px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .profile-picture-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .profile-picture-placeholder {
+            font-size: 72px;
+            color: rgba(255,255,255,0.85);
+        }
+
+        .hidden-placeholder { display: none !important; }
+
+        .upload-controls {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+            visibility: hidden;
+        }
+
+        .btn-upload {
+            display: inline-block;
+            padding: 9px 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.25s;
+            border: none;
+        }
+
+        .btn-upload:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+        }
+
+        .btn-delete-picture {
+            display: none;
+            padding: 9px 18px;
+            background: #ff6b6b;
+            color: #fff;
+            border-radius: 7px;
             border: none;
             cursor: pointer;
             font-weight: 600;
-            transition: all 0.3s;
+            font-size: 13px;
+            transition: all 0.25s;
+        }
+
+        .btn-delete-picture:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255,107,107,0.4);
+        }
+
+        .btn-delete-picture.show { display: inline-block; }
+
+        .upload-hint { font-size: 11px; color: #999; text-align: center; }
+
+        .upload-status {
+            display: none;
+            padding: 9px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .upload-status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; display: block; }
+        .upload-status.error   { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; display: block; }
+        .upload-status.loading { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; display: block; }
+
+        /* ── Transactions table ───────────────────────────────── */
+        .txn-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .txn-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .txn-table thead th {
+            padding: 13px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #fff;
+            font-size: 13px;
+            letter-spacing: 0.3px;
+        }
+
+        .txn-table tbody td {
+            padding: 13px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .txn-table tbody tr:last-child td { border-bottom: none; }
+        .txn-table tbody tr:hover { background: #f8f9ff; }
+
+        .no-transactions {
+            text-align: center;
+            padding: 40px 20px;
+            color: #aaa;
+            font-style: italic;
+            font-size: 15px;
+        }
+
+        /* ── Action buttons ──────────────────────────────────── */
+        .button-group { display: flex; gap: 12px; margin-top: 8px; }
+
+        .btn {
+            padding: 11px 22px;
+            border-radius: 7px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.25s;
             text-decoration: none;
             display: inline-block;
             text-align: center;
@@ -83,71 +233,23 @@
 
         .btn-success {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            color: #fff;
         }
 
         .btn-success:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
         }
 
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-        }
+        .btn-secondary { background: #efefef; color: #444; }
+        .btn-secondary:hover { background: #e0e0e0; }
 
-        .btn-secondary:hover {
-            background: #e0e0e0;
-        }
-
-        .transactions-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .transactions-table thead {
-            background-color: #f8f9fa;
-        }
-
-        .transactions-table th {
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            color: #666;
-            border-bottom: 2px solid #e0e0e0;
-            font-size: 13px;
-        }
-
-        .transactions-table td {
-            padding: 12px;
-            border-bottom: 1px solid #f0f0f0;
-            color: #555;
-            font-size: 14px;
-        }
-
-        .transactions-table tbody tr:hover {
-            background-color: #f8f9fa;
-        }
-
-        .no-transactions {
-            text-align: center;
-            padding: 40px 20px;
-            color: #999;
-            font-style: italic;
-        }
-
-        @media (max-width: 768px) {
-            .row {
-                grid-template-columns: 1fr;
-            }
-
-            .button-group {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-            }
+        /* ── Responsive ──────────────────────────────────────── */
+        @media (max-width: 820px) {
+            .info-picture-grid { grid-template-columns: 1fr; }
+            .info-fields-grid  { grid-template-columns: 1fr; }
+            .button-group      { flex-direction: column; }
+            .btn               { width: 100%; }
         }
     </style>
 </head>
@@ -175,8 +277,9 @@
                     <li><a th:href="@{/add}">➕ Add Student</a></li>
                     <li><a th:href="@{/bulk-import}">📊 Bulk Import</a></li>
                     <li>
-                        <form th:action="@{/logout}" method="post" style="display: inline;">
-                            <button type="submit" class="sidebar-logout" style="border: none; background: none; cursor: pointer; width: 100%; text-align: left;">
+                        <form th:action="@{/logout}" method="post" style="display:inline;">
+                            <button type="submit" class="sidebar-logout"
+                                    style="border:none;background:none;cursor:pointer;width:100%;text-align:left;">
                                 🚪 Logout
                             </button>
                         </form>
@@ -188,71 +291,249 @@
         <!-- Main Content -->
         <section class="layout-content">
             <div class="detail-container">
+
                 <div class="detail-header">
                     <h1>Student Details</h1>
                     <p>Complete information and transaction history</p>
                 </div>
 
-                <!-- Student Information Card -->
-                <div class="card">
-                    <div class="card-header">📋 Personal Information</div>
-                    <div class="row">
-                        <div class="info-group">
-                            <p><strong>First Name:</strong>
-                                <span th:text="${#strings.arraySplit(student.name ?: '', ' ')[0] ?: 'N/A'}"></span>
-                            </p>
-                            <p><strong>Contact Number:</strong> <span th:text="${student.phoneNumber ?: 'N/A'}"></span></p>
-                            <p><strong>Standard:</strong> <span th:text="${student.standard ?: 'N/A'}"></span></p>
-                        </div>
-                        <div class="info-group">
-                            <p><strong>Last Name:</strong>
-                                <span th:text="${#strings.arraySplit(student.name ?: '', ' ')[1] ?: 'N/A'}"></span>
-                            </p>
-                            <p><strong>Alternate Number:</strong> <span th:text="${student.alternateNumber ?: 'N/A'}"></span></p>
-                            <p><strong>Guardian's Name:</strong> <span th:text="${student.guardiansName ?: 'N/A'}"></span></p>
-                        </div>
-                    </div>
-                    <div class="row full">
-                        <div class="info-group">
-                            <p><strong>Address:</strong> <span th:text="${student.address ?: 'N/A'}"></span></p>
-                        </div>
-                    </div>
-                </div>
+                <!-- ═══════════════════════════════════════════════
+                     CARD 1 : Personal Info  +  Profile Picture
+                     ═══════════════════════════════════════════════ -->
+                <div class="sd-card">
+                    <div class="sd-card-header">📋 Personal Information</div>
 
-                <!-- Fee Transactions Card -->
-                <div class="card">
-                    <div class="card-header">💳 Fee Transactions</div>
-                    <div th:if="${transactions != null && transactions.size() > 0}">
-                        <table class="transactions-table">
+                    <div class="info-picture-grid">
+
+                        <!-- LEFT : student details -->
+                        <div class="info-fields-grid">
+                            <div class="info-field">
+                                <strong>First Name</strong>
+                                <span th:text="${#strings.arraySplit(student.name ?: '', ' ')[0] ?: 'N/A'}"></span>
+                            </div>
+                            <div class="info-field">
+                                <strong>Last Name</strong>
+                                <span th:text="${#strings.arraySplit(student.name ?: '', ' ').length > 1 ? #strings.arraySplit(student.name ?: '', ' ')[1] : 'N/A'}"></span>
+                            </div>
+                            <div class="info-field">
+                                <strong>Contact Number</strong>
+                                <span th:text="${student.phoneNumber ?: 'N/A'}"></span>
+                            </div>
+                            <div class="info-field">
+                                <strong>Alternate Number</strong>
+                                <span th:text="${student.alternateNumber ?: 'N/A'}"></span>
+                            </div>
+                            <div class="info-field">
+                                <strong>Standard</strong>
+                                <span th:text="${student.standard ?: 'N/A'}"></span>
+                            </div>
+                            <div class="info-field">
+                                <strong>Guardian's Name</strong>
+                                <span th:text="${student.guardiansName ?: 'N/A'}"></span>
+                            </div>
+                            <div class="info-field full-width">
+                                <strong>Address</strong>
+                                <span th:text="${student.address ?: 'N/A'}"></span>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT : profile picture -->
+                        <div class="profile-picture-col">
+                            <div class="profile-picture-frame">
+                                <img id="profilePictureImg"
+                                     th:if="${student.profilePictureUrl != null
+                                             and student.profilePictureUrl != ''
+                                             and student.profilePictureUrl != '/images/default-avatar.png'}"
+                                     th:src="${student.profilePictureUrl}"
+                                     alt="Student Picture">
+                                <div class="profile-picture-placeholder"
+                                     id="profilePicturePlaceholder"
+                                     th:classappend="${(student.profilePictureUrl == null
+                                                        or student.profilePictureUrl == ''
+                                                        or student.profilePictureUrl == '/images/default-avatar.png')
+                                                       ? '' : ' hidden-placeholder'}">
+                                    📷
+                                </div>
+                            </div>
+
+                            <div class="upload-controls">
+                                <div class="file-input-wrapper">
+                                    <input type="file" id="pictureInput" accept="image/*" name="file">
+                                    <label for="pictureInput" class="btn-upload">📤 Upload Photo</label>
+                                </div>
+                                <button id="deletePictureBtn"
+                                        class="btn-delete-picture"
+                                        th:classappend="${student.profilePictureStoragePath != null
+                                                          and student.profilePictureStoragePath != ''
+                                                          ? ' show' : ''}">
+                                    🗑️ Delete Photo
+                                </button>
+                                <span class="upload-hint">JPG · PNG · GIF &nbsp;|&nbsp; max 5 MB</span>
+                                <div id="uploadStatus" class="upload-status"></div>
+                            </div>
+                        </div>
+
+                    </div><!-- /info-picture-grid -->
+                </div>
+                <!-- ═══════════════════════════════════════════════ -->
+
+                <!-- ═══════════════════════════════════════════════
+                     CARD 2 : Fee Transactions
+                     ═══════════════════════════════════════════════ -->
+                <div class="sd-card">
+                    <div class="sd-card-header">💳 Fee Transactions</div>
+
+                    <div th:if="${transactions != null and !transactions.isEmpty()}">
+                        <table class="txn-table">
                             <thead>
                             <tr>
+                                <th>#</th>
                                 <th>Amount</th>
-                                <th>Date</th>
-                                <th>Month</th>
+                                <th>Transaction Date</th>
+                                <th>Payment Received</th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr th:each="txn : ${transactions}">
+                            <tr th:each="txn, stat : ${transactions}">
+                                <td th:text="${stat.count}"></td>
                                 <td th:text="${'₹' + txn.amount}"></td>
-                                <td th:text="${txn.transactionDate != null ? #temporals.format(txn.transactionDate, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>
-                                <td th:text="${txn.month != null ? #temporals.format(T(java.time.YearMonth).parse(txn.month), 'MMMM yyyy') : 'N/A'}"></td>
+                                <td th:text="${txn.transactionDate != null
+                                              ? #temporals.format(txn.transactionDate, 'dd/MM/yyyy HH:mm')
+                                              : 'N/A'}"></td>
+                                <td th:text="${txn.paymentReceivedDate != null
+                                              ? #temporals.format(txn.paymentReceivedDate, 'dd/MM/yyyy')
+                                              : 'N/A'}"></td>
                             </tr>
                             </tbody>
                         </table>
                     </div>
-                    <div th:if="${transactions == null || transactions.size() == 0}" class="no-transactions">
+
+                    <div th:if="${transactions == null or transactions.isEmpty()}"
+                         class="no-transactions">
                         No transactions recorded yet
                     </div>
                 </div>
+                <!-- ═══════════════════════════════════════════════ -->
 
                 <!-- Action Buttons -->
                 <div class="button-group">
-                    <a class="btn btn-success" th:href="@{/accept/{studentId}(studentId=${student.studentId})}">💰 Accept Fees</a>
+                    <a class="btn btn-success"
+                       th:href="@{/accept/{studentId}(studentId=${student.studentId})}">💰 Accept Fees</a>
                     <a class="btn btn-secondary" th:href="@{/}">↩️ Back to Home</a>
                 </div>
-            </div>
+
+            </div><!-- /detail-container -->
         </section>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Derive student ID from URL  /students/<id>
+        const pathParts   = window.location.pathname.split('/');
+        const studentId   = pathParts[pathParts.length - 1];
+
+        const pictureInput     = document.getElementById('pictureInput');
+        const deletePictureBtn = document.getElementById('deletePictureBtn');
+        const uploadStatus     = document.getElementById('uploadStatus');
+        const placeholder      = document.getElementById('profilePicturePlaceholder');
+        const frame            = document.querySelector('.profile-picture-frame');
+
+        // ── Upload on file selection ─────────────────────────
+        pictureInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                showStatus('Invalid file type. Please upload JPG, PNG, GIF or WEBP.', 'error');
+                pictureInput.value = '';
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                showStatus('File exceeds 5 MB. Please choose a smaller image.', 'error');
+                pictureInput.value = '';
+                return;
+            }
+
+            uploadPicture(file);
+        });
+
+        // ── Delete button ────────────────────────────────────
+        if (deletePictureBtn) {
+            deletePictureBtn.addEventListener('click', function () {
+                if (confirm('Delete this profile picture?')) deletePicture();
+            });
+        }
+
+        // ── Upload ───────────────────────────────────────────
+        function uploadPicture(file) {
+            showStatus('Uploading…', 'loading');
+            const fd = new FormData();
+            fd.append('file', file);
+
+            fetch('/students/' + studentId + '/upload-picture', { method: 'POST', body: fd })
+                .then(r => r.json())
+                .then(data => {
+                    pictureInput.value = '';
+                    if (data.success) {
+                        setImage(data.pictureUrl);
+                        if (deletePictureBtn) deletePictureBtn.classList.add('show');
+                        showStatus('Profile picture uploaded successfully!', 'success');
+                        autoHide();
+                    } else {
+                        showStatus(data.message || 'Upload failed.', 'error');
+                    }
+                })
+                .catch(() => showStatus('Network error — please try again.', 'error'));
+        }
+
+        // ── Delete ───────────────────────────────────────────
+        function deletePicture() {
+            showStatus('Deleting…', 'loading');
+
+            fetch('/students/' + studentId + '/delete-picture', { method: 'DELETE' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        const existing = document.getElementById('profilePictureImg');
+                        if (existing) existing.remove();
+                        if (placeholder) placeholder.classList.remove('hidden-placeholder');
+                        if (deletePictureBtn) deletePictureBtn.classList.remove('show');
+                        showStatus('Profile picture deleted.', 'success');
+                        autoHide();
+                    } else {
+                        showStatus(data.message || 'Delete failed.', 'error');
+                    }
+                })
+                .catch(() => showStatus('Network error — please try again.', 'error'));
+        }
+
+        // ── Helpers ──────────────────────────────────────────
+        function setImage(url) {
+            let img = document.getElementById('profilePictureImg');
+            if (img) {
+                img.src = url;
+            } else {
+                img = document.createElement('img');
+                img.id  = 'profilePictureImg';
+                img.alt = 'Student Picture';
+                img.src = url;
+                frame.insertBefore(img, frame.firstChild);
+            }
+            if (placeholder) placeholder.classList.add('hidden-placeholder');
+        }
+
+        function showStatus(msg, type) {
+            uploadStatus.textContent = msg;
+            uploadStatus.className   = 'upload-status ' + type;
+        }
+
+        function autoHide() {
+            setTimeout(() => { uploadStatus.className = 'upload-status'; }, 3500);
+        }
+    });
+</script>
 </body>
 </html>

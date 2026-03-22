@@ -3,6 +3,7 @@ package com.ija.student_management_portal.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
@@ -20,7 +21,7 @@ public class Transaction {
     private LocalDateTime transactionDate;
     private int amount;
     private String studentId;
-    private String month;
+    private LocalDate paymentReceivedDate;
 
 
 }

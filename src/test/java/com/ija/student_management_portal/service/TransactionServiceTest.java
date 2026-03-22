@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,7 @@ public class TransactionServiceTest {
                 .id(1L)
                 .amount(5000)
                 .studentId("2025-0001")
-                .month("January")
+                .paymentReceivedDate(LocalDate.of(2026, 1, 15))
                 .transactionDate(LocalDateTime.now())
                 .build();
 
@@ -52,7 +53,7 @@ public class TransactionServiceTest {
         transaction.setId(1L);
         transaction.setAmount(5000);
         transaction.setStudentId("2025-0001");
-        transaction.setMonth("January");
+        transaction.setPaymentReceivedDate(LocalDate.of(2026, 1, 15));
         transaction.setTransactionDate(LocalDateTime.now());
     }
 
@@ -72,7 +73,7 @@ public class TransactionServiceTest {
         assertTrue(result.isPresent());
         assertEquals(5000, result.get().getAmount());
         assertEquals("2025-0001", result.get().getStudentId());
-        assertEquals("January", result.get().getMonth());
+        assertEquals(LocalDate.of(2026, 1, 15), result.get().getPaymentReceivedDate());
         verify(transactionRepository, times(1)).save(any(Transaction.class));
     }
 
@@ -88,7 +89,7 @@ public class TransactionServiceTest {
         transaction2.setId(2L);
         transaction2.setAmount(3000);
         transaction2.setStudentId(studentId);
-        transaction2.setMonth("February");
+        transaction2.setPaymentReceivedDate(LocalDate.of(2026, 2, 10));
         transaction2.setTransactionDate(LocalDateTime.now());
         transactionList.add(transaction2);
 
@@ -96,7 +97,7 @@ public class TransactionServiceTest {
                 .id(2L)
                 .amount(3000)
                 .studentId(studentId)
-                .month("February")
+                .paymentReceivedDate(LocalDate.of(2026, 2, 10))
                 .transactionDate(LocalDateTime.now())
                 .build();
 
@@ -144,7 +145,7 @@ public class TransactionServiceTest {
                 .id(1L)
                 .amount(6000)
                 .studentId("2025-0001")
-                .month("January")
+                .paymentReceivedDate(LocalDate.of(2026, 1, 15))
                 .transactionDate(LocalDateTime.now())
                 .build();
 
@@ -152,7 +153,7 @@ public class TransactionServiceTest {
         updatedTransaction.setId(1L);
         updatedTransaction.setAmount(6000);
         updatedTransaction.setStudentId("2025-0001");
-        updatedTransaction.setMonth("January");
+        updatedTransaction.setPaymentReceivedDate(LocalDate.of(2026, 1, 15));
         updatedTransaction.setTransactionDate(LocalDateTime.now());
 
         when(transactionRepository.findById(transactionId))
@@ -200,7 +201,7 @@ public class TransactionServiceTest {
                 .id(3L)
                 .amount(50000)
                 .studentId("2025-0002")
-                .month("March")
+                .paymentReceivedDate(LocalDate.of(2026, 3, 20))
                 .transactionDate(LocalDateTime.now())
                 .build();
 
@@ -208,7 +209,7 @@ public class TransactionServiceTest {
         highAmountTransaction.setId(3L);
         highAmountTransaction.setAmount(50000);
         highAmountTransaction.setStudentId("2025-0002");
-        highAmountTransaction.setMonth("March");
+        highAmountTransaction.setPaymentReceivedDate(LocalDate.of(2026, 3, 20));
         highAmountTransaction.setTransactionDate(LocalDateTime.now());
 
         when(transactionRepository.save(any(Transaction.class)))

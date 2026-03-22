@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +32,7 @@ public class TransactionRepositoryTest {
         transaction = new Transaction();
         transaction.setAmount(5000);
         transaction.setStudentId("2025-0001");
-        transaction.setMonth("January");
+        transaction.setPaymentReceivedDate(LocalDate.of(2026, 1, 15));
         transaction.setTransactionDate(LocalDateTime.now());
     }
 
@@ -57,7 +58,7 @@ public class TransactionRepositoryTest {
         Transaction transaction2 = new Transaction();
         transaction2.setAmount(3000);
         transaction2.setStudentId("2025-0001");
-        transaction2.setMonth("February");
+        transaction2.setPaymentReceivedDate(LocalDate.of(2026, 2, 10));
         transaction2.setTransactionDate(LocalDateTime.now());
         testEntityManager.persistAndFlush(transaction2);
 
@@ -94,7 +95,7 @@ public class TransactionRepositoryTest {
         // Assert
         assertTrue(foundTransaction.isPresent());
         assertEquals(5000, foundTransaction.get().getAmount());
-        assertEquals("January", foundTransaction.get().getMonth());
+        assertEquals(LocalDate.of(2026, 1, 15), foundTransaction.get().getPaymentReceivedDate());
     }
 
     @Test
@@ -137,7 +138,7 @@ public class TransactionRepositoryTest {
         Transaction transaction2 = new Transaction();
         transaction2.setAmount(2000);
         transaction2.setStudentId("2025-0002");
-        transaction2.setMonth("February");
+        transaction2.setPaymentReceivedDate(LocalDate.of(2026, 2, 10));
         transaction2.setTransactionDate(LocalDateTime.now());
         testEntityManager.persistAndFlush(transaction2);
 
@@ -150,27 +151,27 @@ public class TransactionRepositoryTest {
     }
 
     @Test
-    @DisplayName("Should handle multiple transactions for same student different months")
+    @DisplayName("Should handle multiple transactions for same student different dates")
     public void testMultipleTransactionsSameStudent() {
         // Arrange
         Transaction trans1 = new Transaction();
         trans1.setAmount(5000);
         trans1.setStudentId("2025-0001");
-        trans1.setMonth("January");
+        trans1.setPaymentReceivedDate(LocalDate.of(2026, 1, 15));
         trans1.setTransactionDate(LocalDateTime.now());
         testEntityManager.persistAndFlush(trans1);
 
         Transaction trans2 = new Transaction();
         trans2.setAmount(5000);
         trans2.setStudentId("2025-0001");
-        trans2.setMonth("February");
+        trans2.setPaymentReceivedDate(LocalDate.of(2026, 2, 10));
         trans2.setTransactionDate(LocalDateTime.now());
         testEntityManager.persistAndFlush(trans2);
 
         Transaction trans3 = new Transaction();
         trans3.setAmount(5000);
         trans3.setStudentId("2025-0001");
-        trans3.setMonth("March");
+        trans3.setPaymentReceivedDate(LocalDate.of(2026, 3, 20));
         trans3.setTransactionDate(LocalDateTime.now());
         testEntityManager.persistAndFlush(trans3);
 

@@ -1,9 +1,11 @@
 package com.ija.student_management_portal.dto;
 
-import java.time.YearMonth;
+import java.time.LocalDate;
 
 public class FeePayment {
     private String studentId;
+    private int amount;
+    private LocalDate paymentReceivedDate;
 
     public String getStudentId() {
         return studentId;
@@ -21,17 +23,13 @@ public class FeePayment {
         this.amount = amount;
     }
 
-    public String getFeeMonth() {
-        return feeMonth;
+    public LocalDate getPaymentReceivedDate() {
+        return paymentReceivedDate;
     }
 
-    public void setFeeMonth(String feeMonth) {
-        this.feeMonth = feeMonth;
+    public void setPaymentReceivedDate(LocalDate paymentReceivedDate) {
+        this.paymentReceivedDate = paymentReceivedDate;
     }
-
-    private int amount;
-    private String feeMonth;
-
 
 }
 

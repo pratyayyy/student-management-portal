@@ -1,5 +1,9 @@
 server:
   port: 8080
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
 
 spring:
   application:
@@ -19,3 +23,18 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
+
+# File storage configuration
+file:
+  storage:
+    upload-dir: uploads/profiles
+    max-file-size: 5242880  # 5MB in bytes
+    allowed-extensions:
+      - jpg
+      - jpeg
+      - png
+      - gif
+    allowed-mime-types:
+      - image/jpeg
+      - image/png
+      - image/gif

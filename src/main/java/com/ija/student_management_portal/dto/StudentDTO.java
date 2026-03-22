@@ -1,10 +1,12 @@
 package com.ija.student_management_portal.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-
-import java.time.LocalDateTime;
+import lombok.NoArgsConstructor;
 
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class StudentDTO {
 
     private String name;
@@ -14,6 +16,8 @@ public class StudentDTO {
     private String address;
     private String guardiansName;
     private String studentId;
+    private String profilePictureStoragePath;
+    private String profilePictureUrl;
 
     public String getStudentId() {
         return studentId;
@@ -71,30 +75,20 @@ public class StudentDTO {
         this.guardiansName = guardiansName;
     }
 
-
-
-
-    public StudentDTO(String name, String phoneNumber, String alternateNumber, String standard, String address, String guardiansName) {
-        this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.alternateNumber = alternateNumber;
-        this.standard = standard;
-        this.address = address;
-        this.guardiansName = guardiansName;
+    public String getProfilePictureStoragePath() {
+        return profilePictureStoragePath;
     }
 
-    public StudentDTO(String studentId, String name, String phoneNumber, String alternateNumber, String standard, String address, String guardiansName) {
-        this.studentId = studentId;
-        this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.alternateNumber = alternateNumber;
-        this.standard = standard;
-        this.address = address;
-        this.guardiansName = guardiansName;
+    public void setProfilePictureStoragePath(String profilePictureStoragePath) {
+        this.profilePictureStoragePath = profilePictureStoragePath;
     }
 
-    public StudentDTO() {
+    public String getProfilePictureUrl() {
+        return profilePictureUrl;
+    }
 
+    public void setProfilePictureUrl(String profilePictureUrl) {
+        this.profilePictureUrl = profilePictureUrl;
     }
 
 }
