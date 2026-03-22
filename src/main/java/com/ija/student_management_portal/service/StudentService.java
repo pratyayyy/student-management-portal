@@ -193,7 +193,16 @@ public class StudentService {
     public Optional<StudentDTO> getStudentById(String studentId){
         log.info("Fetching student with id : {}", studentId);
         Optional<Student> studentEntity = studentRepository.findStudentByStudentId(studentId);
-        StudentDTO stdDTO = objectmapper.convertValue(studentEntity,StudentDTO.class);
+        StudentDTO stdDTO = objectmapper.convertValue(studentEntity, StudentDTO.class);
+
+        // profilePictureUrl is NOT stored in the DB – reconstruct it from
+        // profilePictureStoragePath on every load so the image renders on page refresh.
+        if (stdDTO.getProfilePictureStoragePath() != null
+                && !stdDTO.getProfilePictureStoragePath().isEmpty()) {
+            stdDTO.setProfilePictureUrl(
+                    fileStorageService.getProfilePictureUrl(stdDTO.getProfilePictureStoragePath()));
+        }
+
         log.info("Fetched student with id {}", stdDTO.toString());
         return Optional.of(stdDTO);
     }
