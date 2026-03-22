@@ -23,5 +23,6 @@ public class Transaction {
     private String studentId;
     private LocalDate paymentReceivedDate;
 
+    private String paymentForMonth;
 
 }

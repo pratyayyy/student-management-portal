@@ -391,6 +391,7 @@
                                 <th>Amount</th>
                                 <th>Transaction Date</th>
                                 <th>Payment Received</th>
+                                <th>Payment for Month</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -402,6 +403,9 @@
                                               : 'N/A'}"></td>
                                 <td th:text="${txn.paymentReceivedDate != null
                                               ? #temporals.format(txn.paymentReceivedDate, 'dd/MM/yyyy')
+                                              : 'N/A'}"></td>
+                                <td th:text="${txn.paymentForMonth != null and !txn.paymentForMonth.isEmpty()
+                                              ? #temporals.format(T(java.time.YearMonth).parse(txn.paymentForMonth), 'MMMM yyyy')
                                               : 'N/A'}"></td>
                             </tr>
                             </tbody>
