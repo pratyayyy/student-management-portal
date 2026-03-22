@@ -2,6 +2,7 @@ package com.ija.student_management_portal.dto;
 
 import lombok.Builder;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Builder
@@ -9,7 +10,7 @@ public class TransactionDTO {
     private Long id;
     private LocalDateTime transactionDate;
     private int amount;
-    private String month;
+    private LocalDate paymentReceivedDate;
     private String studentId;
 
     public Long getId() {
@@ -36,12 +37,12 @@ public class TransactionDTO {
         this.amount = amount;
     }
 
-    public String getMonth() {
-        return month;
+    public LocalDate getPaymentReceivedDate() {
+        return paymentReceivedDate;
     }
 
-    public void setMonth(String month) {
-        this.month = month;
+    public void setPaymentReceivedDate(LocalDate paymentReceivedDate) {
+        this.paymentReceivedDate = paymentReceivedDate;
     }
 
     public String getStudentId() {

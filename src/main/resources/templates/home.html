@@ -4,6 +4,7 @@
     <title>Fees Management System</title>
     <link rel="stylesheet" th:href="@{/css/navbar-sidebar.css}">
     <link rel="stylesheet" th:href="@{/css/home.css}">
+    <link rel="stylesheet" th:href="@{/css/search-pagination.css}">
     <style>
         .dashboard-header {
             margin-bottom: 30px;
@@ -63,39 +64,93 @@
                     <p>View and manage all registered students</p>
                 </div>
 
-                <table class="styled-table">
-                    <thead>
-                    <tr>
-                        <th>Student Id</th>
-                        <th>Name</th>
-                        <th>Contact Number</th>
-                        <th>Alternate Number</th>
-                        <th>Standard</th>
-                        <th>Address</th>
-                        <th>Guardians Name</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="student : ${students}">
-                        <td th:text="${student.studentId}"></td>
-                        <td th:text="${student.name}"></td>
-                        <td th:text="${student.phoneNumber}"></td>
-                        <td th:text="${student.alternateNumber}"></td>
-                        <td th:text="${student.standard}"></td>
-                        <td th:text="${student.address}"></td>
-                        <td th:text="${student.guardiansName}"></td>
-                        <td>
-                            <a class="btn" th:href="@{/students/{id}(id=${student.studentId})}">
-                                View Details
-                            </a>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                <!-- Search and Filter Container -->
+                <div class="search-container" id="studentSearchContainer">
+                    <input type="text"
+                           id="studentSearchInput"
+                           class="search-input"
+                           placeholder="Search students by name..."
+                           autocomplete="off">
+
+                    <div class="page-size-selector">
+                        <label for="pageSizeSelect" class="page-size-label">Records per page:</label>
+                        <select id="pageSizeSelect" class="page-size-select">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="30">30</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner" class="loading-spinner">
+                    <div class="spinner"></div>
+                    <span class="loading-text">Loading students...</span>
+                </div>
+
+                <!-- No Results Message -->
+                <div id="noResultsMessage" class="no-results-message" style="display: none;">
+                    <div class="no-results-icon">📭</div>
+                    <div class="no-results-text">No students found matching your search criteria.</div>
+                </div>
+
+                <!-- Student Table -->
+                <div id="studentTable" class="table-section">
+                    <table class="styled-table">
+                        <thead>
+                        <tr>
+                            <th>Student Id</th>
+                            <th>Name</th>
+                            <th>Contact Number</th>
+                            <th>Alternate Number</th>
+                            <th>Standard</th>
+                            <th>Address</th>
+                            <th>Guardians Name</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="student : ${students}">
+                            <td th:text="${student.studentId}"></td>
+                            <td th:text="${student.name}"></td>
+                            <td th:text="${student.phoneNumber}"></td>
+                            <td th:text="${student.alternateNumber}"></td>
+                            <td th:text="${student.standard}"></td>
+                            <td th:text="${student.address}"></td>
+                            <td th:text="${student.guardiansName}"></td>
+                            <td>
+                                <a class="btn" th:href="@{/students/{id}(id=${student.studentId})}">
+                                    View Details
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination Controls -->
+                <div id="paginationControls" class="pagination-container" style="display: none;">
+                    <div class="page-info" id="pageInfo"></div>
+
+                    <div class="pagination-nav-buttons">
+                        <button id="prevPageBtn" class="page-nav-btn">← Previous</button>
+                        <div id="paginationButtons" class="pagination-buttons-wrapper"></div>
+                        <button id="nextPageBtn" class="page-nav-btn">Next →</button>
+                    </div>
+                </div>
             </div>
         </section>
     </div>
 </div>
+
+<!-- Scripts -->
+<script th:src="@{/js/search.js}"></script>
+<script>
+    // Show pagination controls when needed
+    document.addEventListener('DOMContentLoaded', function() {
+        const performSearch = window.studentSearch.performSearch;
+        // Pagination will be shown/hidden dynamically by search.js
+    });
+</script>
 </body>
 </html>

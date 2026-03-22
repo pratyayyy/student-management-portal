@@ -84,6 +84,34 @@ body {
     white-space: nowrap;
 }
 
+/* Search Bar in Navbar */
+.search-bar-navbar {
+    display: none;
+    align-items: center;
+}
+
+.navbar-search-input {
+    padding: 8px 15px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    font-size: 13px;
+    min-width: 250px;
+    transition: all 0.3s ease;
+}
+
+.navbar-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.navbar-search-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
 /* ==================== SIDEBAR ==================== */
 .sidebar-container {
     background: white;
@@ -215,6 +243,10 @@ body {
         padding: 10px 15px;
         font-size: 13px;
         gap: 10px;
+    }
+
+    .search-bar-navbar {
+        display: none;
     }
 }
 
