@@ -139,6 +139,7 @@ public class RootController {
                         .transactionDate(LocalDateTime.now())
                         .paymentReceivedDate(feePayment.getPaymentReceivedDate())
                         .studentId(feePayment.getStudentId())
+                        .paymentForMonth(feePayment.getPaymentForMonth())
                         .build();
 
         transactionService.saveTransactionDetails(transactionDTO);

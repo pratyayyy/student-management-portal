@@ -174,10 +174,16 @@
                                 <input type="number" class="form-control" th:field="*{amount}" placeholder="Enter amount" required/>
                             </div>
 
-                            <!-- Fee Month -->
+                            <!-- Payment Received Date -->
                             <div class="form-group">
                                 <label class="form-label">Payment Received Date *</label>
                                 <input type="date" class="form-control" th:field="*{paymentReceivedDate}" required/>
+                            </div>
+
+                            <!-- Payment for Month -->
+                            <div class="form-group">
+                                <label class="form-label">Payment for Month *</label>
+                                <input type="month" class="form-control" th:field="*{paymentForMonth}" required/>
                             </div>
 
                             <!-- Buttons -->
