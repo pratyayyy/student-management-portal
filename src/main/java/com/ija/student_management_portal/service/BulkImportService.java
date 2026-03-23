@@ -199,12 +199,12 @@ public class BulkImportService {
                 Column A: Student Name (Required)
                 Column B: Phone Number (Required, 10 digits)
                 Column C: Alternate Number (Optional)
-                Column D: Standard/Class (Required)
+                Column D: Course (Required)
                 Column E: Address (Required)
                 Column F: Guardian's Name (Required)
                 
                 Example:
-                Row 1 (Header): Name | Phone Number | Alternate Number | Standard | Address | Guardians Name
+                Row 1 (Header): Name | Phone Number | Alternate Number | Course | Address | Guardians Name
                 Row 2: John Doe | 9876543210 | 9876543211 | 10 | 123 Main St | Mr. Doe
                 Row 3: Jane Smith | 8765432109 | 8765432108 | 9 | 456 Oak Ave | Mrs. Smith
                 
