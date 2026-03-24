@@ -1,15 +1,17 @@
 package com.ija.student_management_portal.controller;
 
+import com.ija.student_management_portal.entity.StudentProfilePicture;
+import com.ija.student_management_portal.service.ProfilePictureService;
 import com.ija.student_management_portal.dto.FeePayment;
 import com.ija.student_management_portal.dto.PaginatedStudentResponse;
 import com.ija.student_management_portal.dto.StudentDTO;
 import com.ija.student_management_portal.dto.TransactionDTO;
-import com.ija.student_management_portal.entity.Student;
 import com.ija.student_management_portal.service.StudentService;
 import com.ija.student_management_portal.service.TransactionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,6 +36,9 @@ public class RootController {
 
     @Autowired
     private TransactionService transactionService;
+
+    @Autowired
+    private ProfilePictureService profilePictureService;
 
     @GetMapping("/home")
     public String homePage(Model model) {
@@ -226,12 +231,22 @@ public class RootController {
             response.put("success", false);
             response.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(response);
-
-        } catch (IOException e) {
-            log.error("Error deleting picture for student: {}", studentId, e);
-            response.put("success", false);
-            response.put("message", "Failed to delete profile picture");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+
+    /**
+     * Serve the compressed profile picture stored in the database.
+     *
+     * @param studentId the student whose picture is requested
+     * @return the JPEG image bytes, or 404 if no picture is stored
+     */
+    @GetMapping("/students/{studentId}/profile-picture")
+    @ResponseBody
+    public ResponseEntity<byte[]> getStudentProfilePicture(@PathVariable String studentId) {
+        return profilePictureService.getProfilePicture(studentId)
+                .map(pic -> ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(pic.getContentType()))
+                        .body(pic.getImageData()))
+                .orElse(ResponseEntity.notFound().build());
     }
 }

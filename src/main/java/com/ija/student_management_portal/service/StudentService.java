@@ -31,7 +31,7 @@ public class StudentService {
     private final StudentRepository studentRepository;
 
     @Autowired
-    public StudentService(StudentRepository studentRepository){
+    public StudentService(StudentRepository studentRepository) {
         this.studentRepository = studentRepository;
     }
 
@@ -42,32 +42,21 @@ public class StudentService {
     private StudentRollCounterRepository studentRollCounterRepository;
 
     @Autowired
-    private FileStorageService fileStorageService;
-
-    // ... existing methods ...
+    private ProfilePictureService profilePictureService;
 
     /**
-     * Search students by name with pagination
-     * @param searchTerm the search term (name)
-     * @param page the page number (0-indexed)
-     * @param pageSize the number of records per page
-     * @return paginated response with student data
+     * Search students by name with pagination.
      */
     @Transactional(readOnly = true)
     public PaginatedStudentResponse searchStudents(String searchTerm, int page, int pageSize) {
         log.info("Searching students with term: '{}', page: {}, pageSize: {}", searchTerm, page, pageSize);
 
-        // Validate input
         if (!StringUtils.hasText(searchTerm)) {
             searchTerm = "";
         }
-
-        // Limit search term length for security
         if (searchTerm.length() > 100) {
             searchTerm = searchTerm.substring(0, 100);
         }
-
-        // Ensure valid page and pageSize values
         if (page < 0) page = 0;
         if (pageSize <= 0) pageSize = 10;
         if (pageSize > 100) pageSize = 100;
@@ -109,10 +98,7 @@ public class StudentService {
     }
 
     /**
-     * Get all students with pagination
-     * @param page the page number (0-indexed)
-     * @param pageSize the number of records per page
-     * @return paginated response with all students
+     * Get all students with pagination.
      */
     @Transactional(readOnly = true)
     public PaginatedStudentResponse getAllStudentsWithPagination(int page, int pageSize) {
@@ -157,7 +143,7 @@ public class StudentService {
     }
 
     @Transactional
-    public Optional<StudentDTO> saveStudent(StudentDTO studentDTO){
+    public Optional<StudentDTO> saveStudent(StudentDTO studentDTO) {
 
         int admissionYear = LocalDateTime.now().getYear();
         StudentRollCounter counter = studentRollCounterRepository.findForUpdate(admissionYear)
@@ -173,7 +159,6 @@ public class StudentService {
 
         String studentId = admissionYear + "-" + String.format("%04d", counter.getLastNumber());
 
-
         Student student = new Student();
         student.setName(studentDTO.getName());
         student.setStandard(studentDTO.getStandard());
@@ -184,23 +169,20 @@ public class StudentService {
         student.setAlternateNumber(studentDTO.getAlternateNumber());
         student.setStudentId(studentId);
 
-        Student studentEntity =  studentRepository.save(student);
+        Student studentEntity = studentRepository.save(student);
         log.info("Saved student with student id : {}", studentEntity.getStudentId());
-        StudentDTO stdDTO =  objectmapper.convertValue(studentEntity,StudentDTO.class);
+        StudentDTO stdDTO = objectmapper.convertValue(studentEntity, StudentDTO.class);
         return Optional.of(stdDTO);
     }
 
-    public Optional<StudentDTO> getStudentById(String studentId){
+    public Optional<StudentDTO> getStudentById(String studentId) {
         log.info("Fetching student with id : {}", studentId);
         Optional<Student> studentEntity = studentRepository.findStudentByStudentId(studentId);
         StudentDTO stdDTO = objectmapper.convertValue(studentEntity, StudentDTO.class);
 
-        // profilePictureUrl is NOT stored in the DB – reconstruct it from
-        // profilePictureStoragePath on every load so the image renders on page refresh.
-        if (stdDTO.getProfilePictureStoragePath() != null
-                && !stdDTO.getProfilePictureStoragePath().isEmpty()) {
-            stdDTO.setProfilePictureUrl(
-                    fileStorageService.getProfilePictureUrl(stdDTO.getProfilePictureStoragePath()));
+        // Set profilePictureUrl when a picture is stored in the database.
+        if (profilePictureService.hasProfilePicture(studentId)) {
+            stdDTO.setProfilePictureUrl("/students/" + studentId + "/profile-picture");
         }
 
         log.info("Fetched student with id {}", stdDTO.toString());
@@ -208,9 +190,10 @@ public class StudentService {
     }
 
     @Transactional
-    public Optional<StudentDTO> updateStudent(String studentId,StudentDTO studentDTO){
+    public Optional<StudentDTO> updateStudent(String studentId, StudentDTO studentDTO) {
         Optional<Student> existingStudentEntity = studentRepository.findStudentByStudentId(studentId);
-        Student existingStudent = existingStudentEntity.orElseGet(null);
+        Student existingStudent = existingStudentEntity
+                .orElseThrow(() -> new IllegalArgumentException("Student with ID " + studentId + " not found"));
         existingStudent.setName(studentDTO.getName());
         existingStudent.setStandard(studentDTO.getStandard());
         existingStudent.setGuardiansName(studentDTO.getGuardiansName());
@@ -225,12 +208,13 @@ public class StudentService {
     }
 
     @Transactional
-    public void deleteStudentById(String studentId){
-         studentRepository.deleteByStudentId(studentId);
-         log.info("Student with id {} successfully deleted", studentId);
+    public void deleteStudentById(String studentId) {
+        profilePictureService.deleteProfilePicture(studentId);
+        studentRepository.deleteByStudentId(studentId);
+        log.info("Student with id {} successfully deleted", studentId);
     }
 
-    public List<StudentDTO> getAllStudents(){
+    public List<StudentDTO> getAllStudents() {
         log.info("fetched all students from database.....");
         return studentRepository.findAll().stream()
                 .map(entity -> objectmapper.convertValue(entity, StudentDTO.class))
@@ -238,11 +222,13 @@ public class StudentService {
     }
 
     /**
-     * Upload a profile picture for a student
+     * Upload a profile picture for a student.
+     * The image is compressed and stored in the {@code student_profile_pictures} table.
+     *
      * @param studentId the student ID
-     * @param file the image file to upload
-     * @return updated StudentDTO with picture URL
-     * @throws IOException if file upload fails
+     * @param file      the image file to upload
+     * @return updated StudentDTO with a URL to retrieve the picture
+     * @throws IOException              if compression or persistence fails
      * @throws IllegalArgumentException if validation fails
      */
     @Transactional
@@ -254,43 +240,24 @@ public class StudentService {
             throw new IllegalArgumentException("Student with ID " + studentId + " not found");
         }
 
-        Student student = studentOptional.get();
+        profilePictureService.storeProfilePicture(file, studentId);
 
-        try {
-            // Delete old picture if exists
-            if (student.getProfilePictureStoragePath() != null && !student.getProfilePictureStoragePath().isEmpty()) {
-                try {
-                    fileStorageService.deleteProfilePicture(student.getProfilePictureStoragePath());
-                } catch (IOException e) {
-                    log.warn("Failed to delete old picture for student: {}", studentId, e);
-                }
-            }
+        String pictureUrl = "/students/" + studentId + "/profile-picture";
+        StudentDTO studentDTO = objectmapper.convertValue(studentOptional.get(), StudentDTO.class);
+        studentDTO.setProfilePictureUrl(pictureUrl);
 
-            // Upload new picture
-            String storagePath = fileStorageService.uploadProfilePicture(file, studentId);
-            student.setProfilePictureStoragePath(storagePath);
-
-            Student updatedStudent = studentRepository.save(student);
-            StudentDTO studentDTO = objectmapper.convertValue(updatedStudent, StudentDTO.class);
-            studentDTO.setProfilePictureUrl(fileStorageService.getProfilePictureUrl(storagePath));
-
-            log.info("Successfully uploaded profile picture for student: {}", studentId);
-            return studentDTO;
-
-        } catch (IOException e) {
-            log.error("Failed to upload profile picture for student: {}", studentId, e);
-            throw e;
-        }
+        log.info("Successfully uploaded profile picture for student: {}", studentId);
+        return studentDTO;
     }
 
     /**
-     * Delete a student's profile picture
+     * Delete a student's profile picture row from the database.
+     *
      * @param studentId the student ID
-     * @return updated StudentDTO without picture
-     * @throws IOException if file deletion fails
+     * @return updated StudentDTO without a picture URL
      */
     @Transactional
-    public StudentDTO deleteStudentPicture(String studentId) throws IOException {
+    public StudentDTO deleteStudentPicture(String studentId) {
         log.info("Deleting profile picture for student: {}", studentId);
 
         Optional<Student> studentOptional = studentRepository.findByStudentId(studentId);
@@ -298,24 +265,8 @@ public class StudentService {
             throw new IllegalArgumentException("Student with ID " + studentId + " not found");
         }
 
-        Student student = studentOptional.get();
-
-        try {
-            if (student.getProfilePictureStoragePath() != null && !student.getProfilePictureStoragePath().isEmpty()) {
-                fileStorageService.deleteProfilePicture(student.getProfilePictureStoragePath());
-                student.setProfilePictureStoragePath(null);
-
-                Student updatedStudent = studentRepository.save(student);
-                log.info("Successfully deleted profile picture for student: {}", studentId);
-                return objectmapper.convertValue(updatedStudent, StudentDTO.class);
-            }
-
-            return objectmapper.convertValue(student, StudentDTO.class);
-
-        } catch (IOException e) {
-            log.error("Failed to delete profile picture for student: {}", studentId, e);
-            throw e;
-        }
+        profilePictureService.deleteProfilePicture(studentId);
+        log.info("Successfully deleted profile picture for student: {}", studentId);
+        return objectmapper.convertValue(studentOptional.get(), StudentDTO.class);
     }
-
 }
