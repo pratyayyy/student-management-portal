@@ -16,7 +16,6 @@ public class StudentDTO {
     private String address;
     private String guardiansName;
     private String studentId;
-    private String profilePictureStoragePath;
     private String profilePictureUrl;
 
     public String getStudentId() {
@@ -75,14 +74,6 @@ public class StudentDTO {
         this.guardiansName = guardiansName;
     }
 
-    public String getProfilePictureStoragePath() {
-        return profilePictureStoragePath;
-    }
-
-    public void setProfilePictureStoragePath(String profilePictureStoragePath) {
-        this.profilePictureStoragePath = profilePictureStoragePath;
-    }
-
     public String getProfilePictureUrl() {
         return profilePictureUrl;
     }
@@ -90,5 +81,4 @@ public class StudentDTO {
     public void setProfilePictureUrl(String profilePictureUrl) {
         this.profilePictureUrl = profilePictureUrl;
     }
-
 }

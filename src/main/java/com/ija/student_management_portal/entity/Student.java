@@ -27,8 +27,6 @@ public class Student {
     private LocalDateTime admissionDate;
     @Column(unique = true)
     private String studentId;
-    @Column(nullable = true, length = 500)
-    private String profilePictureStoragePath;
 
     public String getStudentId() {
         return studentId;
@@ -100,13 +98,5 @@ public class Student {
 
     public void setStandard(String standard) {
         this.standard = standard;
-    }
-
-    public String getProfilePictureStoragePath() {
-        return profilePictureStoragePath;
-    }
-
-    public void setProfilePictureStoragePath(String profilePictureStoragePath) {
-        this.profilePictureStoragePath = profilePictureStoragePath;
     }
 }
