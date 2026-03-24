@@ -215,20 +215,45 @@
             font-size: 15px;
         }
 
-        /* ── Action buttons ──────────────────────────────────── */
-        .button-group { display: flex; gap: 12px; margin-top: 8px; }
+        /* ── Card header with inline actions ────────────────── */
+        .sd-card-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 22px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+            flex-wrap: wrap;
+        }
 
+        .sd-card-header-row .sd-card-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .sd-card-header-row .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        /* ── Action buttons ──────────────────────────────────── */
         .btn {
-            padding: 11px 22px;
+            padding: 9px 18px;
             border-radius: 7px;
             border: none;
             cursor: pointer;
             font-weight: 600;
             transition: all 0.25s;
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             text-align: center;
-            font-size: 14px;
+            font-size: 13px;
+            white-space: nowrap;
         }
 
         .btn-success {
@@ -241,15 +266,21 @@
             box-shadow: 0 4px 12px rgba(102,126,234,0.4);
         }
 
-        .btn-secondary { background: #efefef; color: #444; }
+        .btn-secondary {
+            background: #efefef;
+            color: #444;
+            border: 1px solid #ddd;
+        }
+
         .btn-secondary:hover { background: #e0e0e0; }
 
         /* ── Responsive ──────────────────────────────────────── */
         @media (max-width: 820px) {
             .info-picture-grid { grid-template-columns: 1fr; }
             .info-fields-grid  { grid-template-columns: 1fr; }
-            .button-group      { flex-direction: column; }
-            .btn               { width: 100%; }
+            .sd-card-header-row { flex-direction: column; align-items: flex-start; }
+            .header-actions    { width: 100%; }
+            .header-actions .btn { flex: 1; justify-content: center; }
         }
     </style>
 </head>
@@ -381,7 +412,14 @@
                      CARD 2 : Fee Transactions
                      ═══════════════════════════════════════════════ -->
                 <div class="sd-card">
-                    <div class="sd-card-header">💳 Fee Transactions</div>
+                    <div class="sd-card-header-row">
+                        <span class="sd-card-title">💳 Fee Transactions</span>
+                        <div class="header-actions">
+                            <a class="btn btn-success"
+                               th:href="@{/accept/{studentId}(studentId=${student.studentId})}">💰 Accept Fees</a>
+                            <a class="btn btn-secondary" th:href="@{/}">↩️ Back to Home</a>
+                        </div>
+                    </div>
 
                     <div th:if="${transactions != null and !transactions.isEmpty()}">
                         <table class="txn-table">
@@ -419,12 +457,6 @@
                 </div>
                 <!-- ═══════════════════════════════════════════════ -->
 
-                <!-- Action Buttons -->
-                <div class="button-group">
-                    <a class="btn btn-success"
-                       th:href="@{/accept/{studentId}(studentId=${student.studentId})}">💰 Accept Fees</a>
-                    <a class="btn btn-secondary" th:href="@{/}">↩️ Back to Home</a>
-                </div>
 
             </div><!-- /detail-container -->
         </section>
