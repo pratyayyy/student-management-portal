@@ -8,24 +8,18 @@ import java.util.List;
 
 /**
  * Configuration class for file storage settings
- * Manages upload directory, file size limits, and allowed file types
+ * Manages S3 bucket settings, file size limits, and allowed file types
  */
 @Component
 @ConfigurationProperties(prefix = "file.storage")
 public class FileStorageConfig {
 
-    private String uploadDir = "uploads/profiles";
     private Long maxFileSize = 5242880L; // 5MB default
     private List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
     private List<String> allowedMimeTypes = Arrays.asList("image/jpeg", "image/png", "image/gif");
-
-    public String getUploadDir() {
-        return uploadDir;
-    }
-
-    public void setUploadDir(String uploadDir) {
-        this.uploadDir = uploadDir;
-    }
+    private String s3BucketName;
+    private String s3Region;
+    private long presignedUrlExpirationMinutes = 60;
 
     public Long getMaxFileSize() {
         return maxFileSize;
@@ -49,5 +43,29 @@ public class FileStorageConfig {
 
     public void setAllowedMimeTypes(List<String> allowedMimeTypes) {
         this.allowedMimeTypes = allowedMimeTypes;
+    }
+
+    public String getS3BucketName() {
+        return s3BucketName;
+    }
+
+    public void setS3BucketName(String s3BucketName) {
+        this.s3BucketName = s3BucketName;
+    }
+
+    public String getS3Region() {
+        return s3Region;
+    }
+
+    public void setS3Region(String s3Region) {
+        this.s3Region = s3Region;
+    }
+
+    public long getPresignedUrlExpirationMinutes() {
+        return presignedUrlExpirationMinutes;
+    }
+
+    public void setPresignedUrlExpirationMinutes(long presignedUrlExpirationMinutes) {
+        this.presignedUrlExpirationMinutes = presignedUrlExpirationMinutes;
     }
 }

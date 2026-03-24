@@ -5,15 +5,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.UUID;
 
 /**
- * Service for handling file storage operations
+ * Service for handling file storage operations using AWS S3
  * Handles file uploads, validation, retrieval and deletion with security considerations
  */
 @Service
@@ -23,11 +31,17 @@ public class FileStorageService {
     @Autowired
     private FileStorageConfig fileStorageConfig;
 
+    @Autowired
+    private S3Client s3Client;
+
+    @Autowired
+    private S3Presigner s3Presigner;
+
     /**
-     * Upload a student profile picture
+     * Upload a student profile picture to S3
      * @param file The multipart file to upload
      * @param studentId The ID of the student
-     * @return The relative path where the file was stored
+     * @return The S3 object key where the file was stored
      * @throws IOException if file operations fail
      * @throws IllegalArgumentException if file validation fails
      */
@@ -37,30 +51,22 @@ public class FileStorageService {
         validateFile(file);
 
         try {
-            // Create upload directory if it doesn't exist
-            Path uploadPath = Paths.get(fileStorageConfig.getUploadDir(), studentId).toAbsolutePath().normalize();
-            Files.createDirectories(uploadPath);
-
-            // Generate unique filename with UUID
+            // Generate unique S3 object key
             String originalFileName = file.getOriginalFilename();
             String fileExtension = getFileExtension(originalFileName);
-            String storedFileName = UUID.randomUUID() + "." + fileExtension;
+            String s3Key = "profiles/" + studentId + "/" + UUID.randomUUID() + "." + fileExtension;
 
-            // Save file
-            Path filePath = uploadPath.resolve(storedFileName).normalize();
+            PutObjectRequest putRequest = PutObjectRequest.builder()
+                    .bucket(fileStorageConfig.getS3BucketName())
+                    .key(s3Key)
+                    .contentType(file.getContentType())
+                    .contentLength(file.getSize())
+                    .build();
 
-            // Security check: ensure the file path is within the upload directory
-            if (!filePath.getParent().equals(uploadPath.normalize())) {
-                throw new IllegalArgumentException("Invalid file path - potential path traversal attack detected");
-            }
+            s3Client.putObject(putRequest, RequestBody.fromBytes(file.getBytes()));
 
-            Files.write(filePath, file.getBytes());
-
-            // Return relative path for storage in database
-            String relativePath = "uploads/profiles/" + studentId + "/" + storedFileName;
-            log.info("Successfully uploaded profile picture for student: {} at path: {}", studentId, relativePath);
-
-            return relativePath;
+            log.info("Successfully uploaded profile picture for student: {} with key: {}", studentId, s3Key);
+            return s3Key;
 
         } catch (IOException e) {
             log.error("Failed to upload file for student: {}", studentId, e);
@@ -69,29 +75,25 @@ public class FileStorageService {
     }
 
     /**
-     * Delete a profile picture
-     * @param storagePath The relative storage path of the file to delete
+     * Delete a profile picture from S3
+     * @param s3Key The S3 object key of the file to delete
      * @throws IOException if file deletion fails
      */
-    public void deleteProfilePicture(String storagePath) throws IOException {
-        if (storagePath == null || storagePath.isEmpty()) {
+    public void deleteProfilePicture(String s3Key) throws IOException {
+        if (s3Key == null || s3Key.isEmpty()) {
             return;
         }
 
         try {
-            Path filePath = Paths.get(storagePath).toAbsolutePath().normalize();
+            DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+                    .bucket(fileStorageConfig.getS3BucketName())
+                    .key(s3Key)
+                    .build();
 
-            // Security check
-            if (!filePath.toString().contains("uploads/profiles")) {
-                throw new IllegalArgumentException("Invalid file path for deletion");
-            }
-
-            if (Files.exists(filePath)) {
-                Files.delete(filePath);
-                log.info("Successfully deleted file: {}", storagePath);
-            }
-        } catch (IOException e) {
-            log.error("Failed to delete file: {}", storagePath, e);
+            s3Client.deleteObject(deleteRequest);
+            log.info("Successfully deleted file from S3: {}", s3Key);
+        } catch (S3Exception e) {
+            log.error("Failed to delete file from S3: {}", s3Key, e);
             throw new IOException("Failed to delete file", e);
         }
     }
@@ -142,26 +144,45 @@ public class FileStorageService {
     }
 
     /**
-     * Get the full URL path for a stored profile picture
-     * @param storagePath The relative storage path
-     * @return The URL path to access the picture
+     * Get a pre-signed URL for a stored profile picture in S3
+     * @param s3Key The S3 object key
+     * @return A pre-signed URL to access the picture, or the default avatar path if key is null/empty
      */
-    public String getProfilePictureUrl(String storagePath) {
-        if (storagePath == null || storagePath.isEmpty()) {
-            return "/images/default-avatar.png"; // Default avatar
+    public String getProfilePictureUrl(String s3Key) {
+        if (s3Key == null || s3Key.isEmpty()) {
+            return "/images/default-avatar.png";
         }
-        return "/" + storagePath;
+
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(fileStorageConfig.getS3BucketName())
+                .key(s3Key)
+                .build();
+
+        GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofMinutes(fileStorageConfig.getPresignedUrlExpirationMinutes()))
+                .getObjectRequest(getObjectRequest)
+                .build();
+
+        return s3Presigner.presignGetObject(presignRequest).url().toString();
     }
 
     /**
-     * Check if a file exists
-     * @param storagePath The relative storage path
-     * @return true if file exists, false otherwise
+     * Check if a file exists in S3
+     * @param s3Key The S3 object key
+     * @return true if the object exists, false otherwise
      */
-    public boolean fileExists(String storagePath) {
-        if (storagePath == null || storagePath.isEmpty()) {
+    public boolean fileExists(String s3Key) {
+        if (s3Key == null || s3Key.isEmpty()) {
             return false;
         }
-        return Files.exists(Paths.get(storagePath).toAbsolutePath().normalize());
+        try {
+            s3Client.headObject(HeadObjectRequest.builder()
+                    .bucket(fileStorageConfig.getS3BucketName())
+                    .key(s3Key)
+                    .build());
+            return true;
+        } catch (NoSuchKeyException e) {
+            return false;
+        }
     }
 }

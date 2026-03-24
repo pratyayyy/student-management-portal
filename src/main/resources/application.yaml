@@ -24,11 +24,13 @@ spring:
       ddl-auto: update
     show-sql: false
 
-# File storage configuration
+# File storage configuration (AWS S3)
 file:
   storage:
-    upload-dir: uploads/profiles
+    s3-bucket-name: ${S3_BUCKET_NAME:my-student-management-bucket}
+    s3-region: ${AWS_REGION:us-east-1}
     max-file-size: 5242880  # 5MB in bytes
+    presigned-url-expiration-minutes: 60
     allowed-extensions:
       - jpg
       - jpeg

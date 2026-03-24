@@ -12,8 +12,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
@@ -44,7 +42,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests((authz) -> authz
-                .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/uploads/**").permitAll()
+                .requestMatchers("/", "/login", "/register", "/css/**", "/js/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/student/**").hasRole("STUDENT")
                 .requestMatchers("/home", "/students/**", "/accept/**", "/fees/**", "/add", "/bulk-import/**").hasRole("ADMIN")
@@ -76,21 +74,6 @@ public class SecurityConfig {
             .csrf((csrf) -> csrf.disable());
 
         return http.build();
-    }
-
-    /**
-     * Configure resource handler for uploaded files
-     */
-    @Bean
-    public WebMvcConfigurer webMvcConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addResourceHandlers(ResourceHandlerRegistry registry) {
-                registry
-                    .addResourceHandler("/uploads/**")
-                    .addResourceLocations("file:./uploads/");
-            }
-        };
     }
 }
 
