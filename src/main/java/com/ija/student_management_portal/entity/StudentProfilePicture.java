@@ -20,7 +20,6 @@ public class StudentProfilePicture {
     @Column(unique = true, nullable = false)
     private String studentId;
 
-    @Lob
     @Column(columnDefinition = "bytea", nullable = false)
     private byte[] imageData;
 
