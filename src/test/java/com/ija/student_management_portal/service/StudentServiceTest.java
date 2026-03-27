@@ -3,16 +3,15 @@ package com.ija.student_management_portal.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ija.student_management_portal.dto.StudentDTO;
 import com.ija.student_management_portal.entity.Student;
-import com.ija.student_management_portal.entity.StudentRollCounter;
 import com.ija.student_management_portal.repository.StudentRepository;
-import com.ija.student_management_portal.repository.StudentRollCounterRepository;
+import com.ija.student_management_portal.service.ProfilePictureService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,7 +20,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,20 +30,22 @@ public class StudentServiceTest {
     private StudentRepository studentRepository;
 
     @Mock
-    private StudentRollCounterRepository studentRollCounterRepository;
+    private ProfilePictureService profilePictureService;
 
     @Mock
     private ObjectMapper objectMapper;
 
-    @InjectMocks
     private StudentService studentService;
 
     private StudentDTO studentDTO;
     private Student student;
-    private StudentRollCounter rollCounter;
 
     @BeforeEach
     public void setUp() {
+        studentService = new StudentService(studentRepository);
+        ReflectionTestUtils.setField(studentService, "objectmapper", objectMapper);
+        ReflectionTestUtils.setField(studentService, "profilePictureService", profilePictureService);
+
         // Initialize test data
         studentDTO = new StudentDTO();
         studentDTO.setName("John Doe");
@@ -54,6 +54,7 @@ public class StudentServiceTest {
         studentDTO.setStandard("10");
         studentDTO.setAddress("123 Main St");
         studentDTO.setGuardiansName("Jane Doe");
+        studentDTO.setStudentId("2025-0001");
 
         student = Student.builder()
                 .id(1L)
@@ -66,20 +67,14 @@ public class StudentServiceTest {
                 .admissionDate(LocalDateTime.now())
                 .studentId("2025-0001")
                 .build();
-
-        rollCounter = new StudentRollCounter();
-        rollCounter.setAdmissionYear(2025);
-        rollCounter.setLastNumber(1);
     }
 
     @Test
-    @DisplayName("Should save student successfully with generated student ID")
+    @DisplayName("Should save student successfully with manually provided student ID")
     public void testSaveStudent_Success() {
         // Arrange
-        when(studentRollCounterRepository.findForUpdate(anyInt()))
-                .thenReturn(Optional.of(rollCounter));
-        when(studentRollCounterRepository.saveAndFlush(any(StudentRollCounter.class)))
-                .thenReturn(rollCounter);
+        when(studentRepository.findStudentByStudentId("2025-0001"))
+                .thenReturn(Optional.empty());
         when(studentRepository.save(any(Student.class)))
                 .thenReturn(student);
         when(objectMapper.convertValue(student, StudentDTO.class))
@@ -91,37 +86,48 @@ public class StudentServiceTest {
         // Assert
         assertTrue(result.isPresent());
         assertEquals("John Doe", result.get().getName());
-        assertEquals("10", result.get().getStandard());
+        assertEquals("2025-0001", result.get().getStudentId());
         verify(studentRepository, times(1)).save(any(Student.class));
-        verify(studentRollCounterRepository, times(1)).saveAndFlush(any(StudentRollCounter.class));
     }
 
     @Test
-    @DisplayName("Should create new roll counter when not exists")
-    public void testSaveStudent_CreateNewCounter() {
+    @DisplayName("Should throw exception when student ID is missing")
+    public void testSaveStudent_MissingStudentId() {
         // Arrange
-        StudentRollCounter newCounter = new StudentRollCounter();
-        newCounter.setAdmissionYear(2025);
-        newCounter.setLastNumber(1);
+        studentDTO.setStudentId(null);
 
-        when(studentRollCounterRepository.findForUpdate(anyInt()))
-                .thenReturn(Optional.empty());
-        when(studentRollCounterRepository.save(any(StudentRollCounter.class)))
-                .thenReturn(newCounter);
-        when(studentRollCounterRepository.saveAndFlush(any(StudentRollCounter.class)))
-                .thenReturn(newCounter);
-        when(studentRepository.save(any(Student.class)))
-                .thenReturn(student);
-        when(objectMapper.convertValue(student, StudentDTO.class))
-                .thenReturn(studentDTO);
+        // Act & Assert
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> studentService.saveStudent(studentDTO));
+        assertEquals("Student ID is required", ex.getMessage());
+        verify(studentRepository, never()).save(any());
+    }
 
-        // Act
-        Optional<StudentDTO> result = studentService.saveStudent(studentDTO);
+    @Test
+    @DisplayName("Should throw exception when student ID is blank")
+    public void testSaveStudent_BlankStudentId() {
+        // Arrange
+        studentDTO.setStudentId("   ");
 
-        // Assert
-        assertTrue(result.isPresent());
-        verify(studentRollCounterRepository, times(1)).save(any(StudentRollCounter.class));
-        verify(studentRollCounterRepository, times(1)).saveAndFlush(any(StudentRollCounter.class));
+        // Act & Assert
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> studentService.saveStudent(studentDTO));
+        assertEquals("Student ID is required", ex.getMessage());
+        verify(studentRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when student ID already exists")
+    public void testSaveStudent_DuplicateStudentId() {
+        // Arrange
+        when(studentRepository.findStudentByStudentId("2025-0001"))
+                .thenReturn(Optional.of(student));
+
+        // Act & Assert
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> studentService.saveStudent(studentDTO));
+        assertTrue(ex.getMessage().contains("already exists"));
+        verify(studentRepository, never()).save(any());
     }
 
     @Test
