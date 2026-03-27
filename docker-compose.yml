@@ -1,10 +1,7 @@
 version: "3.8"
 services:
   feepay:
-    image: student-management-backend:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: iamdebjit3107/ija-admin-app:latest
     ports:
       - "8080:8080"
       - "5005:5005"
