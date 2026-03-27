@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Controller
 @Slf4j
@@ -115,14 +116,43 @@ public class RootController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
+        boolean isAdmin = authentication.getAuthorities()
+                .stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+
         Optional<StudentDTO> student = studentService.getStudentById(id);
+        if (student.isEmpty()) {
+            return "redirect:/home";
+        }
         List<TransactionDTO> transactions = transactionService.getTransactionById(id);
 
         model.addAttribute("student", student.get());
         model.addAttribute("transactions", transactions);
         model.addAttribute("username", username);
+        model.addAttribute("isAdmin", isAdmin);
 
         return "student-details";
+    }
+
+    @PostMapping("/students/{id}/update")
+    public String updateStudentDetails(@PathVariable String id,
+                                       @ModelAttribute StudentDTO studentDTO,
+                                       RedirectAttributes redirectAttributes) {
+        String redirectUrl = UriComponentsBuilder.fromPath("/students/{id}")
+                .buildAndExpand(id)
+                .encode()
+                .toUriString();
+        try {
+            studentService.updateStudent(id, studentDTO);
+            redirectAttributes.addFlashAttribute("successMessage", "Student details updated successfully.");
+        } catch (IllegalArgumentException e) {
+            log.warn("Failed to update student {}: {}", id, e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            log.error("Unexpected error updating student {}", id, e);
+            redirectAttributes.addFlashAttribute("errorMessage", "An unexpected error occurred. Please try again.");
+        }
+        return "redirect:" + redirectUrl;
     }
 
     @GetMapping("/accept/{studentId}")
