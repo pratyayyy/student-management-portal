@@ -7,6 +7,7 @@ public class FeePayment {
     private int amount;
     private LocalDate paymentReceivedDate;
     private String paymentForMonth;
+    private String billNumber;
 
     public String getStudentId() {
         return studentId;
@@ -38,6 +39,14 @@ public class FeePayment {
 
     public void setPaymentForMonth(String paymentForMonth) {
         this.paymentForMonth = paymentForMonth;
+    }
+
+    public String getBillNumber() {
+        return billNumber;
+    }
+
+    public void setBillNumber(String billNumber) {
+        this.billNumber = billNumber;
     }
 
 }

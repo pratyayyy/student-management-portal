@@ -13,6 +13,7 @@ public class TransactionDTO {
     private LocalDate paymentReceivedDate;
     private String studentId;
     private String paymentForMonth;
+    private String billNumber;
 
     public Long getId() {
         return id;
@@ -60,5 +61,13 @@ public class TransactionDTO {
 
     public void setPaymentForMonth(String paymentForMonth) {
         this.paymentForMonth = paymentForMonth;
+    }
+
+    public String getBillNumber() {
+        return billNumber;
+    }
+
+    public void setBillNumber(String billNumber) {
+        this.billNumber = billNumber;
     }
 }

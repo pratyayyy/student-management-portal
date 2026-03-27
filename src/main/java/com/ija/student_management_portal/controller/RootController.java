@@ -176,6 +176,7 @@ public class RootController {
                         .paymentReceivedDate(feePayment.getPaymentReceivedDate())
                         .studentId(feePayment.getStudentId())
                         .paymentForMonth(feePayment.getPaymentForMonth())
+                        .billNumber(feePayment.getBillNumber())
                         .build();
 
         transactionService.saveTransactionDetails(transactionDTO);

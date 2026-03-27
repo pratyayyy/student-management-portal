@@ -168,6 +168,12 @@
                             <!-- Student ID (hidden) -->
                             <input type="hidden" th:field="*{studentId}" />
 
+                            <!-- Bill Number -->
+                            <div class="form-group">
+                                <label class="form-label">Bill Number *</label>
+                                <input type="text" class="form-control" th:field="*{billNumber}" placeholder="Enter bill number" required maxlength="50"/>
+                            </div>
+
                             <!-- Amount -->
                             <div class="form-group">
                                 <label class="form-label">Amount (₹) *</label>

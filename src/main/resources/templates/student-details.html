@@ -561,6 +561,7 @@
                             <thead>
                             <tr>
                                 <th>#</th>
+                                <th>Bill No.</th>
                                 <th>Amount</th>
                                 <th>Transaction Date</th>
                                 <th>Payment Received</th>
@@ -570,6 +571,7 @@
                             <tbody>
                             <tr th:each="txn, stat : ${transactions}">
                                 <td th:text="${stat.count}"></td>
+                                <td th:text="${txn.billNumber != null and !txn.billNumber.isEmpty() ? txn.billNumber : 'N/A'}"></td>
                                 <td th:text="${'₹' + txn.amount}"></td>
                                 <td th:text="${txn.transactionDate != null
                                               ? #temporals.format(txn.transactionDate, 'dd/MM/yyyy HH:mm')
