@@ -25,4 +25,6 @@ public class Transaction {
 
     private String paymentForMonth;
 
+    private String billNumber;
+
 }

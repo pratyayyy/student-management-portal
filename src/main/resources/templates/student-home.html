@@ -385,6 +385,7 @@
                 <table class="transactions-table">
                     <thead>
                         <tr>
+                            <th>Bill No.</th>
                             <th>Date</th>
                             <th>Month</th>
                             <th>Amount</th>
@@ -393,6 +394,7 @@
                     </thead>
                     <tbody>
                         <tr th:each="transaction : ${transactions}">
+                            <td th:text="${transaction.billNumber != null and !transaction.billNumber.isEmpty() ? transaction.billNumber : 'N/A'}"></td>
                             <td th:text="${#temporals.format(transaction.transactionDate, 'dd MMM yyyy HH:mm')}"></td>
                             <td th:text="${transaction.month}"></td>
                             <td class="transaction-amount">₹ <span th:text="${transaction.amount}"></span></td>

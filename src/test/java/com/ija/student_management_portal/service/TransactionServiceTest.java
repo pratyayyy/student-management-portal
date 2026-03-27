@@ -47,6 +47,7 @@ public class TransactionServiceTest {
                 .studentId("2025-0001")
                 .paymentReceivedDate(LocalDate.of(2026, 1, 15))
                 .transactionDate(LocalDateTime.now())
+                .billNumber("BILL-001")
                 .build();
 
         transaction = new Transaction();
@@ -55,6 +56,7 @@ public class TransactionServiceTest {
         transaction.setStudentId("2025-0001");
         transaction.setPaymentReceivedDate(LocalDate.of(2026, 1, 15));
         transaction.setTransactionDate(LocalDateTime.now());
+        transaction.setBillNumber("BILL-001");
     }
 
     @Test
@@ -74,6 +76,7 @@ public class TransactionServiceTest {
         assertEquals(5000, result.get().getAmount());
         assertEquals("2025-0001", result.get().getStudentId());
         assertEquals(LocalDate.of(2026, 1, 15), result.get().getPaymentReceivedDate());
+        assertEquals("BILL-001", result.get().getBillNumber());
         verify(transactionRepository, times(1)).save(any(Transaction.class));
     }
 

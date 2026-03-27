@@ -34,6 +34,7 @@ public class TransactionService {
         transaction.setStudentId(transactionDTO.getStudentId());
         transaction.setPaymentReceivedDate(transactionDTO.getPaymentReceivedDate());
         transaction.setPaymentForMonth(transactionDTO.getPaymentForMonth());
+        transaction.setBillNumber(transactionDTO.getBillNumber());
 
         Transaction transactionEntity = transactionRepository.save(transaction);
         TransactionDTO trnscDTO = objectmapper.convertValue(transactionEntity,TransactionDTO.class);
