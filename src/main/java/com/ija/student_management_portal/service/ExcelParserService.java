@@ -17,7 +17,7 @@ public class ExcelParserService {
 
     /**
      * Parse Excel file and extract student data
-     * Expected columns: Name | Phone Number | Alternate Number | Standard | Address | Guardians Name
+     * Expected columns: Student ID | Name | Phone Number | Alternate Number | Standard | Address | Guardians Name
      */
     public static List<StudentRowModel> parseExcelFile(MultipartFile file) throws IOException {
         List<StudentRowModel> students = new ArrayList<>();
@@ -51,16 +51,17 @@ public class ExcelParserService {
 
     /**
      * Extract student data from a single row
-     * Expected order: Name(0) | Phone(1) | Alternate(2) | Standard(3) | Address(4) | Guardian(5)
+     * Expected order: Student ID(0) | Name(1) | Phone(2) | Alternate(3) | Standard(4) | Address(5) | Guardian(6)
      */
     private static StudentRowModel extractStudentFromRow(Row row) {
         try {
-            String name = getCellValueAsString(row.getCell(0));
-            String phone = getCellValueAsString(row.getCell(1));
-            String alternate = getCellValueAsString(row.getCell(2));
-            String standard = getCellValueAsString(row.getCell(3));
-            String address = getCellValueAsString(row.getCell(4));
-            String guardian = getCellValueAsString(row.getCell(5));
+            String studentId = getCellValueAsString(row.getCell(0));
+            String name = getCellValueAsString(row.getCell(1));
+            String phone = getCellValueAsString(row.getCell(2));
+            String alternate = getCellValueAsString(row.getCell(3));
+            String standard = getCellValueAsString(row.getCell(4));
+            String address = getCellValueAsString(row.getCell(5));
+            String guardian = getCellValueAsString(row.getCell(6));
 
             // Debug logging to troubleshoot guardian name issue
             if (name != null && !name.isEmpty()) {
@@ -75,6 +76,7 @@ public class ExcelParserService {
             }
 
             StudentRowModel studentRowObj = new StudentRowModel();
+            studentRowObj.setStudentId(studentId);
             studentRowObj.setName(name);
             studentRowObj.setPhoneNumber(phone);
             studentRowObj.setAlternateNumber(alternate);

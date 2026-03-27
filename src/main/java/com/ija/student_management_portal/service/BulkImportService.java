@@ -95,6 +95,17 @@ public class BulkImportService {
                         continue;
                     }
 
+                    // Check for duplicate student ID when one is provided in Excel
+                    if (student.getStudentId() != null && !student.getStudentId().trim().isEmpty()
+                            && studentRepository.findByStudentId(student.getStudentId().trim()).isPresent()) {
+                        failedImports++;
+                        String errorMsg = "Row " + rowNumber + ": Student with ID " +
+                                        student.getStudentId().trim() + " already exists";
+                        errors.add(errorMsg);
+                        log.warn(errorMsg);
+                        continue;
+                    }
+
                     // Save student
                     studentService.saveStudent(convertRowObjToDbObj(student));
                     successfulImports++;
@@ -148,20 +159,25 @@ public class BulkImportService {
         studentDTO.setGuardiansName(student.getGuardiansName());
 
         int admissionYear = LocalDateTime.now().getYear();
-        StudentRollCounter counter = studentRollCounterRepository.findForUpdate(admissionYear)
-                .orElseGet(() -> {
-                    StudentRollCounter c = new StudentRollCounter();
-                    c.setAdmissionYear(admissionYear);
-                    c.setLastNumber(0);
-                    return studentRollCounterRepository.save(c);
-                });
 
-        counter.setLastNumber(counter.getLastNumber() + 1);
-        studentRollCounterRepository.saveAndFlush(counter);
+        // Use the student ID from Excel if provided, otherwise generate from counter
+        if (student.getStudentId() != null && !student.getStudentId().trim().isEmpty()) {
+            studentDTO.setStudentId(student.getStudentId().trim());
+        } else {
+            StudentRollCounter counter = studentRollCounterRepository.findForUpdate(admissionYear)
+                    .orElseGet(() -> {
+                        StudentRollCounter c = new StudentRollCounter();
+                        c.setAdmissionYear(admissionYear);
+                        c.setLastNumber(0);
+                        return studentRollCounterRepository.save(c);
+                    });
 
-        String studentId = admissionYear + "-" + String.format("%04d", counter.getLastNumber());
+            counter.setLastNumber(counter.getLastNumber() + 1);
+            studentRollCounterRepository.saveAndFlush(counter);
 
-        studentDTO.setStudentId(studentId);
+            String studentId = admissionYear + "-" + String.format("%04d", counter.getLastNumber());
+            studentDTO.setStudentId(studentId);
+        }
 
         return studentDTO;
     }
@@ -196,19 +212,21 @@ public class BulkImportService {
         return """
                 SAMPLE EXCEL FORMAT:
                 
-                Column A: Student Name (Required)
-                Column B: Phone Number (Required, 10 digits)
-                Column C: Alternate Number (Optional)
-                Column D: Course (Required)
-                Column E: Address (Required)
-                Column F: Guardian's Name (Required)
+                Column A: Student ID (Optional - auto-generated if blank)
+                Column B: Student Name (Required)
+                Column C: Phone Number (Required, 10 digits)
+                Column D: Alternate Number (Optional)
+                Column E: Course (Required)
+                Column F: Address (Required)
+                Column G: Guardian's Name (Required)
                 
                 Example:
-                Row 1 (Header): Name | Phone Number | Alternate Number | Course | Address | Guardians Name
-                Row 2: John Doe | 9876543210 | 9876543211 | 10 | 123 Main St | Mr. Doe
-                Row 3: Jane Smith | 8765432109 | 8765432108 | 9 | 456 Oak Ave | Mrs. Smith
+                Row 1 (Header): Student ID | Name | Phone Number | Alternate Number | Course | Address | Guardians Name
+                Row 2: 2024-0001 | John Doe | 9876543210 | 9876543211 | 10 | 123 Main St | Mr. Doe
+                Row 3:           | Jane Smith | 8765432109 | 8765432108 | 9 | 456 Oak Ave | Mrs. Smith
                 
                 Notes:
+                - Student ID is optional; leave blank to have it auto-generated
                 - Phone number must be 10 digits
                 - All required fields must be filled
                 - Duplicate phone numbers will be skipped
