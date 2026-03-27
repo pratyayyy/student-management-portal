@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ija.student_management_portal.dto.PaginatedStudentResponse;
 import com.ija.student_management_portal.dto.StudentDTO;
 import com.ija.student_management_portal.entity.Student;
-import com.ija.student_management_portal.entity.StudentRollCounter;
 import com.ija.student_management_portal.repository.StudentRepository;
-import com.ija.student_management_portal.repository.StudentRollCounterRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -37,9 +35,6 @@ public class StudentService {
 
     @Autowired
     private ObjectMapper objectmapper;
-
-    @Autowired
-    private StudentRollCounterRepository studentRollCounterRepository;
 
     @Autowired
     private ProfilePictureService profilePictureService;
@@ -145,19 +140,15 @@ public class StudentService {
     @Transactional
     public Optional<StudentDTO> saveStudent(StudentDTO studentDTO) {
 
-        int admissionYear = LocalDateTime.now().getYear();
-        StudentRollCounter counter = studentRollCounterRepository.findForUpdate(admissionYear)
-                .orElseGet(() -> {
-                    StudentRollCounter c = new StudentRollCounter();
-                    c.setAdmissionYear(admissionYear);
-                    c.setLastNumber(0);
-                    return studentRollCounterRepository.save(c);
-                });
+        if (!StringUtils.hasText(studentDTO.getStudentId())) {
+            throw new IllegalArgumentException("Student ID is required");
+        }
 
-        counter.setLastNumber(counter.getLastNumber() + 1);
-        studentRollCounterRepository.saveAndFlush(counter);
+        String studentId = studentDTO.getStudentId().trim();
 
-        String studentId = admissionYear + "-" + String.format("%04d", counter.getLastNumber());
+        if (studentRepository.findStudentByStudentId(studentId).isPresent()) {
+            throw new IllegalArgumentException("Student ID already exists: " + studentId);
+        }
 
         Student student = new Student();
         student.setName(studentDTO.getName());

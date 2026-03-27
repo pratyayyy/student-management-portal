@@ -338,6 +338,10 @@
 
                         <!-- LEFT : student details -->
                         <div class="info-fields-grid">
+                            <div class="info-field full-width">
+                                <strong>Student ID</strong>
+                                <span th:text="${student.studentId ?: 'N/A'}"></span>
+                            </div>
                             <div class="info-field">
                                 <strong>First Name</strong>
                                 <span th:text="${#strings.arraySplit(student.name ?: '', ' ')[0] ?: 'N/A'}"></span>

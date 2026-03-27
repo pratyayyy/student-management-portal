@@ -19,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -162,8 +163,14 @@ public class RootController {
     }
 
     @PostMapping("/students/add")
-    public String registerStudent(@ModelAttribute StudentDTO studentDTO) {
-        studentService.saveStudent(studentDTO);
+    public String registerStudent(@ModelAttribute StudentDTO studentDTO, RedirectAttributes redirectAttributes) {
+        try {
+            studentService.saveStudent(studentDTO);
+        } catch (IllegalArgumentException e) {
+            log.warn("Failed to register student: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/add";
+        }
         return "redirect:/home"; // Redirect to home page or student list
     }
 
