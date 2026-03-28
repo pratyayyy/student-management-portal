@@ -29,9 +29,9 @@ jobs:
           java-version: '17'
           cache: maven
 
-      # ── 3. Maven Build (compile, test, package) ───────────────────
-      - name: Build with Maven
-        run: ./mvnw clean package -Drevision=${{ env.RELEASE_VERSION }} -DskipTests --batch-mode --no-transfer-progress
+      # ── 3. Maven Build + Docker Image (compile, test, package, docker:build) ──
+      - name: Build with Maven (JAR + Docker image)
+        run: mvn clean install -Pdocker -Drevision=${{ env.RELEASE_VERSION }} -DskipTests --batch-mode --no-transfer-progress
 
       # ── 4. Upload JAR as artifact (optional, handy for debugging) ─
       - name: Upload JAR artifact
@@ -41,22 +41,7 @@ jobs:
           path: target/*.jar
           retention-days: 7
 
-      # ── 5. Docker metadata (tags & labels) ────────────────────────
-      - name: Docker metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.DOCKER_IMAGE }}
-          tags: |
-            type=raw,value=${{ env.RELEASE_VERSION }}
-            type=raw,value=${{ env.RELEASE_VERSION }}-{{sha}}
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      # ── 6. Set up Docker Buildx ───────────────────────────────────
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      # ── 7. Log in to DockerHub ────────────────────────────────────
+      # ── 5. Log in to DockerHub ────────────────────────────────────
       - name: Log in to DockerHub
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
@@ -64,15 +49,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # ── 8. Build & Push Docker image ──────────────────────────────
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      # ── 6. Push Docker image to DockerHub ─────────────────────────
+      - name: Push Docker image
+        if: github.event_name != 'pull_request'
+        run: ./mvnw docker:push -Pdocker -Drevision=${{ env.RELEASE_VERSION }} --batch-mode --no-transfer-progress
 
