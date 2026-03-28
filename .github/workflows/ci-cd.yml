@@ -52,5 +52,5 @@ jobs:
       # ── 6. Push Docker image to DockerHub ─────────────────────────
       - name: Push Docker image
         if: github.event_name != 'pull_request'
-        run: ./mvnw docker:push -Pdocker -Drevision=${{ env.RELEASE_VERSION }} --batch-mode --no-transfer-progress
+        run: mvn docker:push -Pdocker -Drevision=${{ env.RELEASE_VERSION }} --batch-mode --no-transfer-progress
 

@@ -7,10 +7,10 @@ server:
 
 spring:
   application:
-    name: StudentManagementProject
+    name: IJA-ADMIN-APP
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/feesDb
+    url: jdbc:postgresql://postgres:5432/feesDb
     username: postgres
     password: root
     driver-class-name: org.postgresql.Driver
@@ -27,7 +27,6 @@ spring:
 # File storage configuration
 file:
   storage:
-    upload-dir: uploads/profiles
     max-file-size: 5242880  # 5MB in bytes
     allowed-extensions:
       - jpg
