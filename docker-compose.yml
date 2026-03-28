@@ -2,6 +2,7 @@ version: "3.8"
 services:
   ija-admin-app:
     image: iamdebjit3107/ija-admin-app:3.0.0
+    restart: always
     ports:
       - "8080:8080"
     environment:
