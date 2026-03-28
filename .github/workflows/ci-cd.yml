@@ -9,7 +9,7 @@ on:
 
 env:
   DOCKER_IMAGE: iamdebjit3107/ija-admin-app
-  RELEASE_VERSION: 1.0.0
+  RELEASE_VERSION: 2.0.0
 
 jobs:
   build-and-push:
