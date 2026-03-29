@@ -23,30 +23,7 @@ public class LoginController {
      */
     @GetMapping("/")
     public String handleRoot() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        // If not authenticated, show login page
-        if (authentication == null || !authentication.isAuthenticated() ||
-            authentication.getPrincipal().equals("anonymousUser")) {
-            return "redirect:/login";
-        }
-
-        // If authenticated, redirect based on role
-        boolean isAdmin = authentication.getAuthorities()
-                .stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-
-        boolean isStudent = authentication.getAuthorities()
-                .stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_STUDENT"));
-
-        if (isAdmin) {
-            return "redirect:/home";
-        } else if (isStudent) {
-            return "redirect:/student/home";
-        }
-
-        return "redirect:/login";
+        return "forward:/index.html";
     }
 
     /**
@@ -56,13 +33,7 @@ public class LoginController {
     public String showLoginPage(@RequestParam(value = "error", required = false) String error,
                                @RequestParam(value = "logout", required = false) String logout,
                                Model model) {
-        if (error != null) {
-            model.addAttribute("errorMessage", "Invalid username or password");
-        }
-        if (logout != null) {
-            model.addAttribute("logoutMessage", "You have been logged out successfully");
-        }
-        return "login";
+        return "forward:/index.html";
     }
 
     /**
@@ -71,26 +42,7 @@ public class LoginController {
      */
     @GetMapping("/login-success")
     public String loginSuccess() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        boolean isAdmin = authentication.getAuthorities()
-                .stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-
-        boolean isStudent = authentication.getAuthorities()
-                .stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_STUDENT"));
-
-        if (isAdmin) {
-            log.info("Admin user {} successfully authenticated", authentication.getName());
-            return "redirect:/home";
-        } else if (isStudent) {
-            log.info("Student user {} successfully authenticated", authentication.getName());
-            return "redirect:/student/home";
-        }
-
-        log.warn("User {} authenticated but has no recognized role", authentication.getName());
-        return "redirect:/login";
+        return "forward:/index.html";
     }
 
     /**
@@ -98,8 +50,7 @@ public class LoginController {
      */
     @GetMapping("/register")
     public String showRegisterPage(Model model) {
-        model.addAttribute("registrationRequest", new RegistrationRequest());
-        return "login";
+        return "forward:/index.html";
     }
 
     /**

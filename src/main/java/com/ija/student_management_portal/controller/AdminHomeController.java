@@ -22,27 +22,11 @@ public class AdminHomeController {
 
     @GetMapping("/home")
     public String adminHome(Authentication authentication, Model model) {
-        String adminUsername = authentication.getName();
-        log.info("Admin {} accessing admin home page", adminUsername);
-
-        // Get all students for admin to manage
-        List<StudentDTO> students = studentService.getAllStudents();
-        model.addAttribute("students", students);
-        model.addAttribute("adminUsername", adminUsername);
-        model.addAttribute("totalStudents", students.size());
-
-        return "admin-home";
+        return "forward:/index.html";
     }
 
     @GetMapping("/students")
     public String manageStudents(Authentication authentication, Model model) {
-        String adminUsername = authentication.getName();
-        log.info("Admin {} viewing all students", adminUsername);
-
-        List<StudentDTO> students = studentService.getAllStudents();
-        model.addAttribute("students", students);
-        model.addAttribute("adminUsername", adminUsername);
-
-        return "admin-students";
+        return "forward:/index.html";
     }
 }

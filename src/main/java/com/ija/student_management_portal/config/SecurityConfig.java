@@ -45,6 +45,12 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests((authz) -> authz
                 .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/uploads/**").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/assets/**", "/*.js", "/*.css", "/*.html", "/*.ico", "/*.svg", "/*.png", "/*.webp").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/bulk-import/**").hasRole("ADMIN")
+                .requestMatchers("/api/students/**").authenticated()
+                .requestMatchers("/api/fees/**").authenticated()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/student/**").hasRole("STUDENT")
                 .requestMatchers("/home", "/students/**", "/accept/**", "/fees/**", "/add", "/bulk-import/**").hasRole("ADMIN")

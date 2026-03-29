@@ -25,13 +25,7 @@ public class BulkImportController {
      */
     @GetMapping
     public String showBulkImportPage(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
-        model.addAttribute("username", username);
-        model.addAttribute("templateInfo", bulkImportService.getSampleExcelTemplate());
-
-        return "bulk-import";
+        return "forward:/index.html";
     }
 
     /**

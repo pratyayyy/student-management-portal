@@ -44,23 +44,7 @@ public class RootController {
 
     @GetMapping("/home")
     public String homePage(Model model) {
-        // Get current authenticated user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
-        // Check if user has ADMIN role
-        boolean isAdmin = authentication.getAuthorities()
-                .stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-
-        log.info("Home page accessed by user: {} (Admin: {})", username, isAdmin);
-
-        List<StudentDTO> students = studentService.getAllStudents();
-        model.addAttribute("students", students);
-        model.addAttribute("isAdmin", isAdmin);
-        model.addAttribute("username", username);
-
-        return "home";
+        return "forward:/index.html";
     }
 
     /**
@@ -113,25 +97,7 @@ public class RootController {
 
     @GetMapping("/students/{id}")
     public String studentDetails(@PathVariable String id, Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
-        boolean isAdmin = authentication.getAuthorities()
-                .stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-
-        Optional<StudentDTO> student = studentService.getStudentById(id);
-        if (student.isEmpty()) {
-            return "redirect:/home";
-        }
-        List<TransactionDTO> transactions = transactionService.getTransactionById(id);
-
-        model.addAttribute("student", student.get());
-        model.addAttribute("transactions", transactions);
-        model.addAttribute("username", username);
-        model.addAttribute("isAdmin", isAdmin);
-
-        return "student-details";
+        return "forward:/index.html";
     }
 
     @PostMapping("/students/{id}/update")
@@ -157,14 +123,7 @@ public class RootController {
 
     @GetMapping("/accept/{studentId}")
     public String showAcceptFeeForm(@PathVariable String studentId, Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
-        FeePayment feePayment = new FeePayment();
-        feePayment.setStudentId(studentId);
-        model.addAttribute("feePayment", feePayment);
-        model.addAttribute("username", username);
-        return "accept_fee";
+        return "forward:/index.html";
     }
 
     @PostMapping("/fees/accept")
@@ -185,12 +144,7 @@ public class RootController {
 
     @GetMapping("/add")
     public String showAddStudentForm(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
-        model.addAttribute("student", new StudentDTO());
-        model.addAttribute("username", username);
-        return "add_student";
+        return "forward:/index.html";
     }
 
     @PostMapping("/students/add")
