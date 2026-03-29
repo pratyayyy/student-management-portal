@@ -173,7 +173,7 @@ public class StudentService {
 
         // Set profilePictureUrl when a picture is stored in the database.
         if (profilePictureService.hasProfilePicture(studentId)) {
-            stdDTO.setProfilePictureUrl("/students/" + studentId + "/profile-picture");
+            stdDTO.setProfilePictureUrl("/api/students/" + studentId + "/profile-picture");
         }
 
         log.info("Fetched student with id {}", stdDTO.toString());
@@ -233,7 +233,7 @@ public class StudentService {
 
         profilePictureService.storeProfilePicture(file, studentId);
 
-        String pictureUrl = "/students/" + studentId + "/profile-picture";
+        String pictureUrl = "/api/students/" + studentId + "/profile-picture";
         StudentDTO studentDTO = objectmapper.convertValue(studentOptional.get(), StudentDTO.class);
         studentDTO.setProfilePictureUrl(pictureUrl);
 
