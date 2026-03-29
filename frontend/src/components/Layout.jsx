@@ -3,8 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const adminNav = [
-  { path: '/home', label: 'Dashboard', icon: '⚡' },
-  { path: '/admin/home', label: 'Overview', icon: '📊' },
+  { path: '/home', label: 'Dashboard', icon: '📊' },
   { path: '/admin/students', label: 'All Students', icon: '🎓' },
   { path: '/add', label: 'Add Student', icon: '➕' },
   { path: '/bulk-import', label: 'Bulk Import', icon: '📁' },

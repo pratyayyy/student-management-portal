@@ -28,7 +28,6 @@ export default function App() {
 
           {/* Admin routes */}
           <Route path="/home" element={<ProtectedRoute role="ADMIN"><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/admin/home" element={<ProtectedRoute role="ADMIN"><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/students" element={<ProtectedRoute role="ADMIN"><AdminStudents /></ProtectedRoute>} />
           <Route path="/add" element={<ProtectedRoute role="ADMIN"><AddStudent /></ProtectedRoute>} />
           <Route path="/bulk-import" element={<ProtectedRoute role="ADMIN"><BulkImport /></ProtectedRoute>} />
