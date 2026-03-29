@@ -4,6 +4,7 @@ import com.ija.student_management_portal.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -43,50 +44,56 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests((authz) -> authz
-                .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/uploads/**").permitAll()
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(authz -> authz
+                // Public – static assets served by Spring
+                .requestMatchers(
+                    "/", "/index.html",
+                    "/assets/**", "/favicon.svg", "/icons.svg",
+                    "/*.js", "/*.css", "/*.html", "/*.ico", "/*.svg", "/*.png", "/*.webp",
+                    "/uploads/**"
+                ).permitAll()
+
+                // Public – auth API
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/assets/**", "/*.js", "/*.css", "/*.html", "/*.ico", "/*.svg", "/*.png", "/*.webp").permitAll()
+
+                // Admin-only APIs
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/bulk-import/**").hasRole("ADMIN")
+
+                // Authenticated APIs
                 .requestMatchers("/api/students/**").authenticated()
                 .requestMatchers("/api/fees/**").authenticated()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/student/**").hasRole("STUDENT")
-                .requestMatchers("/home", "/students/**", "/accept/**", "/fees/**", "/add", "/bulk-import/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
+
+                // Everything else (SPA forwarded routes) – permit so the
+                // SPA can load and the React router decides what to show.
+                .anyRequest().permitAll()
             )
-            .formLogin((form) -> form
-                .loginPage("/login")
-                .loginProcessingUrl("/login")
-                .usernameParameter("username")
-                .passwordParameter("password")
-                .defaultSuccessUrl("/login-success", true)
-                .failureUrl("/login?error=true")
-                .permitAll()
+            // No form-login – the React SPA does authentication via /api/auth/login
+            .formLogin(form -> form.disable())
+            .logout(logout -> logout.disable())
+            // Return 401 JSON for unauthenticated API calls instead of redirect
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> {
+                    if (request.getRequestURI().startsWith("/api/")) {
+                        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                        response.setContentType("application/json");
+                        response.getWriter().write("{\"message\":\"Not authenticated\"}");
+                    } else {
+                        // For non-API requests, forward to index.html (SPA handles it)
+                        request.getRequestDispatcher("/index.html").forward(request, response);
+                    }
+                })
             )
-            .logout((logout) -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
-                .invalidateHttpSession(true)
-                .clearAuthentication(true)
-                .deleteCookies("JSESSIONID")
-                .permitAll()
-            )
-            .sessionManagement((session) -> session
-                .sessionConcurrency((concurrency) -> concurrency
+            .sessionManagement(session -> session
+                .sessionConcurrency(concurrency -> concurrency
                     .maximumSessions(1)
-                    .expiredUrl("/login?expired=true")
                 )
-            )
-            .csrf((csrf) -> csrf.disable());
+            );
 
         return http.build();
     }
 
-    /**
-     * Configure resource handler for uploaded files
-     */
     @Bean
     public WebMvcConfigurer webMvcConfigurer() {
         return new WebMvcConfigurer() {

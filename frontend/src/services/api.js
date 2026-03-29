@@ -9,9 +9,11 @@ const api = axios.create({
 api.interceptors.response.use(
   res => res,
   err => {
-    if (err.response?.status === 401) {
-      window.location.href = '/login';
-    }
+    // Don't do a hard redirect on 401 — React components (ProtectedRoute,
+    // RootRedirect) handle auth navigation via React Router.  A
+    // window.location.href here would cause an infinite reload loop because
+    // AuthContext.fetchMe() legitimately receives 401 when the user isn't
+    // logged in yet.
     return Promise.reject(err);
   }
 );
@@ -34,15 +36,16 @@ export const studentService = {
   getById: (id) => api.get(`/api/students/${id}`),
   create: (data) => api.post('/api/students', data),
   update: (id, data) => api.put(`/api/students/${id}`, data),
+  delete: (id) => api.delete(`/api/students/${id}`),
   uploadPicture: (studentId, file) => {
     const form = new FormData();
     form.append('file', file);
-    return api.post(`/students/${studentId}/upload-picture`, form, {
+    return api.post(`/api/students/${studentId}/upload-picture`, form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
-  deletePicture: (studentId) => api.delete(`/students/${studentId}/delete-picture`),
-  profilePicUrl: (studentId) => `/students/${studentId}/profile-picture`,
+  deletePicture: (studentId) => api.delete(`/api/students/${studentId}/delete-picture`),
+  profilePicUrl: (studentId) => `/api/students/${studentId}/profile-picture`,
 };
 
 export const adminService = {
@@ -62,5 +65,5 @@ export const bulkImportService = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
-  templateInfo: () => api.get('/bulk-import/template-info'),
+  templateInfo: () => api.get('/api/bulk-import/template-info'),
 };

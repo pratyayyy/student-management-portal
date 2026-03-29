@@ -24,11 +24,19 @@ public class ApiBulkImportController {
             if (file.isEmpty()) {
                 return ResponseEntity.badRequest().body(Map.of("message", "File is empty"));
             }
+            if (file.getSize() > 10 * 1024 * 1024) {
+                return ResponseEntity.badRequest().body(Map.of("message", "File size exceeds 10MB limit"));
+            }
             BulkImportResult result = bulkImportService.importStudentsFromExcel(file);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error("Bulk import error", e);
             return ResponseEntity.internalServerError().body(Map.of("message", "Import failed: " + e.getMessage()));
         }
+    }
+
+    @GetMapping("/template-info")
+    public ResponseEntity<String> getTemplateInfo() {
+        return ResponseEntity.ok(bulkImportService.getSampleExcelTemplate());
     }
 }
