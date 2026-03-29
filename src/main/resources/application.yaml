@@ -7,7 +7,7 @@ server:
 
 spring:
   application:
-    name: IJA-ADMIN-APP
+    name: Institute of Junior Accountants
 
   datasource:
     url: jdbc:postgresql://localhost:5432/feesDb

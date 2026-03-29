@@ -42,11 +42,11 @@ export default function Layout({ children }) {
               </svg>
             </button>
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-white font-bold">
-                S
+              <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-white font-bold text-xs">
+                IJA
               </div>
               <span className="text-white font-bold text-lg hidden sm:block">
-                Student Portal
+                Institute of Junior Accountants
               </span>
             </Link>
           </div>

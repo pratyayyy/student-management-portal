@@ -33,7 +33,7 @@ export default function AddStudent() {
       <div className="max-w-2xl mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-slate-900">Add New Student</h1>
-          <p className="text-slate-500 mt-1">Register a new student to the portal</p>
+          <p className="text-slate-500 mt-1">Register a new student to IJA</p>
         </div>
 
         <div className="card overflow-hidden">

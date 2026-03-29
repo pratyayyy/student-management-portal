@@ -51,8 +51,8 @@ export default function AdminDashboard() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
-          <p className="text-slate-500 mt-1">Welcome back! Here&apos;s what&apos;s happening today.</p>
+          <h1 className="text-2xl font-bold text-slate-900">IJA Admin Dashboard</h1>
+          <p className="text-slate-500 mt-1">Welcome back! Here&apos;s what&apos;s happening at the Institute of Junior Accountants.</p>
         </div>
 
         {/* Stats */}

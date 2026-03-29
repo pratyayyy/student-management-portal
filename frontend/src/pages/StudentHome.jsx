@@ -38,7 +38,7 @@ export default function StudentHome() {
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-slate-900">My Dashboard</h1>
-          <p className="text-slate-500 mt-1">Welcome, {user?.username}!</p>
+          <p className="text-slate-500 mt-1">Welcome to Institute of Junior Accountants, {user?.username}!</p>
         </div>
 
         {/* Profile card */}
