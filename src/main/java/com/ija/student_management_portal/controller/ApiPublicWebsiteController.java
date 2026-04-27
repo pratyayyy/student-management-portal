@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Public REST endpoints consumed by the promotional website.
@@ -33,6 +34,18 @@ public class ApiPublicWebsiteController {
     @GetMapping("/content")
     public ResponseEntity<List<SiteContentDTO>> getContent() {
         return ResponseEntity.ok(siteContentService.getAllContent());
+    }
+
+    /** Fetch feature toggles as featureName → enabled map. */
+    @GetMapping("/features")
+    public ResponseEntity<Map<String, Boolean>> getFeatures() {
+        return ResponseEntity.ok(siteContentService.getAllFeatures());
+    }
+
+    /** Fetch combined config (featureConfig + contentConfig) for the promo site. */
+    @GetMapping("/config")
+    public ResponseEntity<Map<String, Object>> getConfig() {
+        return ResponseEntity.ok(siteContentService.getPublicConfig());
     }
 
     /** Fetch images for a specific section type (HERO, ABOUT, GALLERY, LOGO). */
