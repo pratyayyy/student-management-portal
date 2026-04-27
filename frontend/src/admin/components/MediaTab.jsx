@@ -66,7 +66,7 @@ function ImageCard({ image, onDelete, onUpdateMeta }) {
             Delete
           </button>
         </div>
-        <p className="text-xs text-slate-400">{image.originalFileName} · {Math.round((image.compressedSize || 0) / 1024)} KB</p>
+        <p className="text-xs text-slate-400">{image.originalFileName} · {((image.compressedSize || 0) / 1024).toFixed(1)} KB</p>
       </div>
     </div>
   );

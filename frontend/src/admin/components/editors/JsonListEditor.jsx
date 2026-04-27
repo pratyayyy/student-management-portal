@@ -30,7 +30,7 @@ export default function JsonListEditor({ contentKey, fields, emptyItem, title })
     setItems((prev) => prev.map((item, i) => i === index ? { ...item, [field]: value } : item));
   };
 
-  const handleAdd = () => setItems((prev) => [...prev, { ...emptyItem, id: Date.now() }]);
+  const handleAdd = () => setItems((prev) => [...prev, { ...emptyItem, id: crypto.randomUUID() }]);
 
   const handleDelete = (index) => setItems((prev) => prev.filter((_, i) => i !== index));
 

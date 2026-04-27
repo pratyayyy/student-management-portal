@@ -57,8 +57,8 @@ export const defaultContentConfig = {
 function persistToLocal(config) {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify(config));
-  } catch {
-    // storage quota exceeded – ignore
+  } catch (err) {
+    console.warn('[configService] Failed to persist to localStorage:', err);
   }
 }
 
@@ -67,7 +67,8 @@ function loadFromLocal() {
   try {
     const raw = localStorage.getItem(LS_KEY);
     return raw ? JSON.parse(raw) : null;
-  } catch {
+  } catch (err) {
+    console.warn('[configService] Failed to read from localStorage:', err);
     return null;
   }
 }
