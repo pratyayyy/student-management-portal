@@ -52,6 +52,43 @@ export const adminService = {
   stats: () => api.get('/api/admin/stats'),
 };
 
+export const websiteService = {
+  // Text content
+  getContent: () => api.get('/api/admin/website/content'),
+  updateContent: (updates) => api.put('/api/admin/website/content', updates),
+
+  // Feature toggles
+  getFeatures: () => api.get('/api/admin/website/features'),
+  updateFeatures: (toggles) => api.put('/api/admin/website/features', toggles),
+
+  // Full config (features + content)
+  getConfig: () => api.get('/api/admin/website/config'),
+  saveConfig: (config) => api.post('/api/admin/website/config', config),
+
+  // Images
+  getAllImages: () => api.get('/api/admin/website/images'),
+  getImagesByType: (type) => api.get(`/api/admin/website/images/type/${type}`),
+  uploadImage: (file, imageType, altText = '', sortOrder = 0) => {
+    const form = new FormData();
+    form.append('file', file);
+    form.append('imageType', imageType);
+    form.append('altText', altText);
+    form.append('sortOrder', String(sortOrder));
+    return api.post('/api/admin/website/images/upload', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  updateImageMeta: (id, data) => api.put(`/api/admin/website/images/${id}`, data),
+  deleteImage: (id) => api.delete(`/api/admin/website/images/${id}`),
+
+  // Public helpers (no auth)
+  getPublicContent: () => api.get('/api/public/website/content'),
+  getPublicImages: (type) => api.get(`/api/public/website/images/${type}`),
+  getPublicFeatures: () => api.get('/api/public/website/features'),
+  getPublicConfig: () => api.get('/api/public/website/config'),
+  imageFileUrl: (id) => `/api/public/website/images/file/${id}`,
+};
+
 export const feeService = {
   getByStudent: (studentId) => api.get(`/api/fees/student/${studentId}`),
   create: (data) => api.post('/api/fees', data),

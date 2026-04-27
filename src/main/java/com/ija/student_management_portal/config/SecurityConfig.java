@@ -57,6 +57,9 @@ public class SecurityConfig {
                 // Public – auth API
                 .requestMatchers("/api/auth/**").permitAll()
 
+                // Public – promotional website data (no login required)
+                .requestMatchers("/api/public/**").permitAll()
+
                 // Admin-only APIs
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/bulk-import/**").hasRole("ADMIN")

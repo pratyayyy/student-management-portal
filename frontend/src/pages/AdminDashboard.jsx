@@ -91,6 +91,15 @@ export default function AdminDashboard() {
               <p className="text-xs text-slate-500">View &amp; manage</p>
             </div>
           </Link>
+          <Link to="/website-manager" className="card p-5 flex items-center gap-4 hover:border-indigo-200 hover:shadow-md transition group">
+            <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center text-xl group-hover:bg-teal-500 transition">
+              <span className="group-hover:text-white">🌐</span>
+            </div>
+            <div>
+              <p className="font-semibold text-slate-900">Website Manager</p>
+              <p className="text-xs text-slate-500">Edit promotional content</p>
+            </div>
+          </Link>
         </div>
 
         {/* Recent students table */}
