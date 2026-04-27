@@ -9,7 +9,6 @@ import StudentDetails from './pages/StudentDetails';
 import AddStudent from './pages/AddStudent';
 import AcceptFee from './pages/AcceptFee';
 import BulkImport from './pages/BulkImport';
-import WebsiteManager from './pages/WebsiteManager';
 import AdminConsole from './admin/AdminConsole';
 import NotFound from './pages/NotFound';
 
@@ -33,7 +32,6 @@ export default function App() {
           <Route path="/admin/students" element={<ProtectedRoute role="ADMIN"><AdminStudents /></ProtectedRoute>} />
           <Route path="/add" element={<ProtectedRoute role="ADMIN"><AddStudent /></ProtectedRoute>} />
           <Route path="/bulk-import" element={<ProtectedRoute role="ADMIN"><BulkImport /></ProtectedRoute>} />
-          <Route path="/website-manager" element={<ProtectedRoute role="ADMIN"><WebsiteManager /></ProtectedRoute>} />
           <Route path="/admin/console" element={<ProtectedRoute role="ADMIN"><AdminConsole /></ProtectedRoute>} />
           <Route path="/accept/:studentId" element={<ProtectedRoute role="ADMIN"><AcceptFee /></ProtectedRoute>} />
           <Route path="/students/:id" element={<ProtectedRoute><StudentDetails /></ProtectedRoute>} />
