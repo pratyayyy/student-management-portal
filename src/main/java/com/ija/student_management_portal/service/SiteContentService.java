@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Manages editable text content for the promotional website.
+ * Manages editable text content and feature toggles for the promotional website.
  * Provides default seed values so the site is functional out of the box.
  */
 @Service
@@ -25,6 +25,9 @@ public class SiteContentService {
 
     /** Ordered map of key → {label, default value} used for seeding and UI labelling. */
     private static final Map<String, String[]> DEFAULTS = new LinkedHashMap<>();
+
+    /** Feature toggle keys with labels and default enabled state ("true"/"false"). */
+    private static final Map<String, String[]> FEATURE_DEFAULTS = new LinkedHashMap<>();
 
     static {
         // hero section
@@ -48,6 +51,33 @@ public class SiteContentService {
         DEFAULTS.put("stats.students",   new String[]{"Stat: Students",     "2000+"});
         DEFAULTS.put("stats.experience", new String[]{"Stat: Years Experience", "20+"});
         DEFAULTS.put("stats.placement",  new String[]{"Stat: Placement Rate", "95%"});
+
+        // JSON content blocks for complex sections
+        DEFAULTS.put("json.courses",       new String[]{"Courses JSON",       "[]"});
+        DEFAULTS.put("json.faculty",       new String[]{"Faculty JSON",       "[]"});
+        DEFAULTS.put("json.testimonials",  new String[]{"Testimonials JSON",  "[]"});
+        DEFAULTS.put("json.blog",          new String[]{"Blog Posts JSON",    "[]"});
+        DEFAULTS.put("json.results",       new String[]{"Results JSON",       "[]"});
+        DEFAULTS.put("json.faq",           new String[]{"FAQ JSON",           "[]"});
+
+        // Feature toggles (stored as feature.<section> = "true"/"false")
+        FEATURE_DEFAULTS.put("feature.hero",        new String[]{"Hero Section",       "true"});
+        FEATURE_DEFAULTS.put("feature.carousel",    new String[]{"Carousel",           "true"});
+        FEATURE_DEFAULTS.put("feature.about",       new String[]{"About Section",      "true"});
+        FEATURE_DEFAULTS.put("feature.whyChooseUs", new String[]{"Why Choose Us",      "true"});
+        FEATURE_DEFAULTS.put("feature.courses",     new String[]{"Courses Section",    "true"});
+        FEATURE_DEFAULTS.put("feature.results",     new String[]{"Results Section",    "true"});
+        FEATURE_DEFAULTS.put("feature.faculty",     new String[]{"Faculty Section",    "true"});
+        FEATURE_DEFAULTS.put("feature.testimonials",new String[]{"Testimonials",       "true"});
+        FEATURE_DEFAULTS.put("feature.blog",        new String[]{"Blog Section",       "true"});
+        FEATURE_DEFAULTS.put("feature.resources",   new String[]{"Resources Section",  "true"});
+        FEATURE_DEFAULTS.put("feature.demoBooking", new String[]{"Demo Booking",       "true"});
+        FEATURE_DEFAULTS.put("feature.scholarship", new String[]{"Scholarship Section","true"});
+        FEATURE_DEFAULTS.put("feature.faq",         new String[]{"FAQ Section",        "true"});
+        FEATURE_DEFAULTS.put("feature.contact",     new String[]{"Contact Section",    "true"});
+        FEATURE_DEFAULTS.put("feature.whatsapp",    new String[]{"WhatsApp Button",    "true"});
+        FEATURE_DEFAULTS.put("feature.leadForms",   new String[]{"Lead Forms",         "true"});
+        FEATURE_DEFAULTS.put("feature.login",       new String[]{"Login Link",         "true"});
     }
 
     @Autowired
@@ -70,13 +100,82 @@ public class SiteContentService {
                 log.debug("Seeded site content: {}", key);
             }
         });
+        FEATURE_DEFAULTS.forEach((key, meta) -> {
+            if (!repository.existsByContentKey(key)) {
+                SiteContent sc = new SiteContent();
+                sc.setContentKey(key);
+                sc.setLabel(meta[0]);
+                sc.setContentValue(meta[1]);
+                sc.setUpdatedAt(LocalDateTime.now());
+                repository.save(sc);
+                log.debug("Seeded feature toggle: {}", key);
+            }
+        });
     }
 
     /** Return all content entries as DTOs. */
     public List<SiteContentDTO> getAllContent() {
         return repository.findAll().stream()
+                .filter(sc -> !sc.getContentKey().startsWith("feature."))
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Return all feature toggles as a map of featureName → enabled.
+     * The feature name is the part after "feature." in the key.
+     */
+    public Map<String, Boolean> getAllFeatures() {
+        Map<String, Boolean> features = new LinkedHashMap<>();
+        FEATURE_DEFAULTS.keySet().forEach(key -> {
+            repository.findByContentKey(key).ifPresentOrElse(
+                sc -> features.put(key.substring("feature.".length()), "true".equalsIgnoreCase(sc.getContentValue())),
+                () -> features.put(key.substring("feature.".length()), true)
+            );
+        });
+        return features;
+    }
+
+    /**
+     * Update feature toggles in bulk.
+     *
+     * @param toggles map of featureName (without "feature." prefix) → boolean
+     * @return updated features map
+     */
+    @Transactional
+    public Map<String, Boolean> updateFeatures(Map<String, Boolean> toggles) {
+        LocalDateTime now = LocalDateTime.now();
+        toggles.forEach((name, enabled) -> {
+            String key = "feature." + name;
+            SiteContent sc = repository.findByContentKey(key)
+                    .orElseGet(() -> {
+                        SiteContent n = new SiteContent();
+                        n.setContentKey(key);
+                        String[] meta = FEATURE_DEFAULTS.get(key);
+                        n.setLabel(meta != null ? meta[0] : name);
+                        return n;
+                    });
+            sc.setContentValue(enabled ? "true" : "false");
+            sc.setUpdatedAt(now);
+            repository.save(sc);
+        });
+        return getAllFeatures();
+    }
+
+    /**
+     * Return the combined public site config (features + content) as raw maps,
+     * suitable for the promo site to consume.
+     */
+    public Map<String, Object> getPublicConfig() {
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("featureConfig", getAllFeatures());
+        // Build flat key/value map for content
+        Map<String, String> contentMap = new LinkedHashMap<>();
+        repository.findAll().stream()
+                .filter(sc -> !sc.getContentKey().startsWith("feature."))
+                .forEach(sc -> contentMap.put(sc.getContentKey(), sc.getContentValue()));
+        result.put("contentConfig", contentMap);
+        return result;
     }
 
     /**

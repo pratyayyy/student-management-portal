@@ -57,6 +57,14 @@ export const websiteService = {
   getContent: () => api.get('/api/admin/website/content'),
   updateContent: (updates) => api.put('/api/admin/website/content', updates),
 
+  // Feature toggles
+  getFeatures: () => api.get('/api/admin/website/features'),
+  updateFeatures: (toggles) => api.put('/api/admin/website/features', toggles),
+
+  // Full config (features + content)
+  getConfig: () => api.get('/api/admin/website/config'),
+  saveConfig: (config) => api.post('/api/admin/website/config', config),
+
   // Images
   getAllImages: () => api.get('/api/admin/website/images'),
   getImagesByType: (type) => api.get(`/api/admin/website/images/type/${type}`),
@@ -76,6 +84,8 @@ export const websiteService = {
   // Public helpers (no auth)
   getPublicContent: () => api.get('/api/public/website/content'),
   getPublicImages: (type) => api.get(`/api/public/website/images/${type}`),
+  getPublicFeatures: () => api.get('/api/public/website/features'),
+  getPublicConfig: () => api.get('/api/public/website/config'),
   imageFileUrl: (id) => `/api/public/website/images/file/${id}`,
 };
 

@@ -8,6 +8,7 @@ const adminNav = [
   { path: '/add', label: 'Add Student', icon: '➕' },
   { path: '/bulk-import', label: 'Bulk Import', icon: '📁' },
   { path: '/website-manager', label: 'Website Manager', icon: '🌐' },
+  { path: '/admin/console', label: 'Admin Console', icon: '🛠️' },
 ];
 
 const studentNav = [

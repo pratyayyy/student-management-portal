@@ -53,6 +53,52 @@ public class ApiAdminWebsiteController {
         }
     }
 
+    // ── Feature Toggles ────────────────────────────────────────────────────────
+
+    /** Get all feature toggles as featureName → enabled map. */
+    @GetMapping("/features")
+    public ResponseEntity<Map<String, Boolean>> getFeatures() {
+        return ResponseEntity.ok(siteContentService.getAllFeatures());
+    }
+
+    /**
+     * Batch-update feature toggles.
+     * Request body: { "hero": true, "blog": false, ... }
+     */
+    @PutMapping("/features")
+    public ResponseEntity<?> updateFeatures(@RequestBody Map<String, Boolean> toggles) {
+        try {
+            Map<String, Boolean> result = siteContentService.updateFeatures(toggles);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error updating feature toggles", e);
+            return ResponseEntity.internalServerError().body(Map.of("message", "Failed to update features"));
+        }
+    }
+
+    /** Get combined config (features + content) for admin. */
+    @GetMapping("/config")
+    public ResponseEntity<Map<String, Object>> getConfig() {
+        return ResponseEntity.ok(siteContentService.getPublicConfig());
+    }
+
+    /** Save full config object (features + content). */
+    @PostMapping("/config")
+    public ResponseEntity<?> saveConfig(@RequestBody Map<String, Object> config) {
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Boolean> features = (Map<String, Boolean>) config.get("featureConfig");
+            @SuppressWarnings("unchecked")
+            Map<String, String> content = (Map<String, String>) config.get("contentConfig");
+            if (features != null) siteContentService.updateFeatures(features);
+            if (content != null) siteContentService.updateContent(content);
+            return ResponseEntity.ok(siteContentService.getPublicConfig());
+        } catch (Exception e) {
+            log.error("Error saving full config", e);
+            return ResponseEntity.internalServerError().body(Map.of("message", "Failed to save config"));
+        }
+    }
+
     // ── Images ─────────────────────────────────────────────────────────────────
 
     /** List all site images (metadata only, no binary data). */
