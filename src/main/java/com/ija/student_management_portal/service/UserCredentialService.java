@@ -113,4 +113,18 @@ public class UserCredentialService {
         }
         return false;
     }
+
+    public long countAll() {
+        return userCredentialRepository.count();
+    }
+
+    public long countByRole(String role) {
+        try {
+            UserCredential.UserRole userRole = UserCredential.UserRole.valueOf(role);
+            return userCredentialRepository.countByRole(userRole);
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid role: {}", role);
+            return 0;
+        }
+    }
 }

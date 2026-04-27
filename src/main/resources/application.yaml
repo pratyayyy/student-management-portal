@@ -7,10 +7,10 @@ server:
 
 spring:
   application:
-    name: IJA-ADMIN-APP
+    name: Institute of Junior Accountants
 
   datasource:
-    url: jdbc:postgresql://postgres:5432/feesDb
+    url: jdbc:postgresql://localhost:5432/feesDb
     username: postgres
     password: root
     driver-class-name: org.postgresql.Driver

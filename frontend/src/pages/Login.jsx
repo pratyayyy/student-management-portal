@@ -1,0 +1,199 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+
+export default function Login() {
+  const { login, register } = useAuth();
+  const navigate = useNavigate();
+  const [tab, setTab] = useState('login'); // 'login' | 'register'
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const [loginForm, setLoginForm] = useState({ username: '', password: '' });
+  const [regForm, setRegForm] = useState({
+    username: '', password: '', confirmPassword: '', role: 'ADMIN', studentId: ''
+  });
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const user = await login(loginForm.username, loginForm.password);
+      navigate(user.role === 'ADMIN' ? '/home' : '/student/home');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid username or password');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (regForm.password !== regForm.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    if (regForm.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+    if (regForm.username.length < 3) {
+      setError('Username must be at least 3 characters');
+      return;
+    }
+    if (regForm.role === 'STUDENT' && !regForm.studentId) {
+      setError('Student ID is required for Student role');
+      return;
+    }
+    setLoading(true);
+    try {
+      await register(regForm);
+      setSuccess('Account created! Please log in.');
+      setTab('login');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-2xl mb-4 backdrop-blur-sm">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <h1 className="text-3xl font-bold text-white">Institute of Junior Accountants</h1>
+          <p className="text-indigo-200 mt-1">Student Management Portal</p>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+          {/* Tabs */}
+          <div className="flex border-b border-slate-100">
+            {['login', 'register'].map(t => (
+              <button
+                key={t}
+                onClick={() => { setTab(t); setError(''); setSuccess(''); }}
+                className={`flex-1 py-4 text-sm font-semibold transition capitalize ${
+                  tab === t
+                    ? 'text-indigo-600 border-b-2 border-indigo-600'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                {t === 'login' ? '🔐 Sign In' : '✨ Create Account'}
+              </button>
+            ))}
+          </div>
+
+          <div className="p-8">
+            {error && (
+              <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                ⚠️ {error}
+              </div>
+            )}
+            {success && (
+              <div className="mb-4 px-4 py-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">
+                ✅ {success}
+              </div>
+            )}
+
+            {tab === 'login' ? (
+              <form onSubmit={handleLogin} className="space-y-5">
+                <div>
+                  <label className="label">Username</label>
+                  <input
+                    type="text" required
+                    value={loginForm.username}
+                    onChange={e => setLoginForm(f => ({ ...f, username: e.target.value }))}
+                    placeholder="Enter your username"
+                    className="input"
+                  />
+                </div>
+                <div>
+                  <label className="label">Password</label>
+                  <input
+                    type="password" required
+                    value={loginForm.password}
+                    onChange={e => setLoginForm(f => ({ ...f, password: e.target.value }))}
+                    placeholder="Enter your password"
+                    className="input"
+                  />
+                </div>
+                <button type="submit" disabled={loading} className="btn-primary w-full justify-center py-2.5">
+                  {loading ? 'Signing in...' : 'Sign In →'}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleRegister} className="space-y-4">
+                <div>
+                  <label className="label">Username</label>
+                  <input
+                    type="text" required
+                    value={regForm.username}
+                    onChange={e => setRegForm(f => ({ ...f, username: e.target.value }))}
+                    placeholder="Min. 3 characters"
+                    className="input"
+                  />
+                </div>
+                <div>
+                  <label className="label">Role</label>
+                  <select
+                    value={regForm.role}
+                    onChange={e => setRegForm(f => ({ ...f, role: e.target.value }))}
+                    className="input"
+                  >
+                    <option value="ADMIN">Admin</option>
+                    <option value="STUDENT">Student</option>
+                  </select>
+                </div>
+                {regForm.role === 'STUDENT' && (
+                  <div>
+                    <label className="label">Student ID</label>
+                    <input
+                      type="text" required
+                      value={regForm.studentId}
+                      onChange={e => setRegForm(f => ({ ...f, studentId: e.target.value }))}
+                      placeholder="e.g. 2024-0001"
+                      className="input"
+                    />
+                  </div>
+                )}
+                <div>
+                  <label className="label">Password</label>
+                  <input
+                    type="password" required
+                    value={regForm.password}
+                    onChange={e => setRegForm(f => ({ ...f, password: e.target.value }))}
+                    placeholder="Min. 6 characters"
+                    className="input"
+                  />
+                </div>
+                <div>
+                  <label className="label">Confirm Password</label>
+                  <input
+                    type="password" required
+                    value={regForm.confirmPassword}
+                    onChange={e => setRegForm(f => ({ ...f, confirmPassword: e.target.value }))}
+                    placeholder="Repeat password"
+                    className="input"
+                  />
+                </div>
+                <button type="submit" disabled={loading} className="btn-primary w-full justify-center py-2.5">
+                  {loading ? 'Creating...' : 'Create Account →'}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
