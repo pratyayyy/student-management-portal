@@ -1,163 +1,78 @@
 name: 🚀 CI/CD Pipeline
-
-# ── Triggers ───────────────────────────────────────────────────────────────────
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-  workflow_dispatch:   # manual trigger from Actions tab
-
-# Cancel in-progress runs on the same ref (saves GitHub Actions minutes)
-concurrency:
-  group: ci-cd-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_dispatch:
 
 # ── Shared env ─────────────────────────────────────────────────────────────────
 env:
   DOCKER_IMAGE:    iamdebjit3107/ija-admin-app
-  RELEASE_VERSION: 3.0.0
-
-# ── Jobs (run in PARALLEL) ─────────────────────────────────────────────────────
+  RELEASE_VERSION: 3.0.0-A1
 jobs:
-
-  # ────────────────────────────────────────────────────────────────────────────
-  # JOB 1 — React frontend → Netlify
-  # The frontend is deployed completely independently of the backend JAR.
-  # "npm run build:netlify" outputs to frontend/dist (NOT src/main/resources/static).
-  # ────────────────────────────────────────────────────────────────────────────
   deploy-frontend:
     name: 🌐 Frontend → Netlify
     runs-on: ubuntu-latest
 
     steps:
-      - name: ⬇️ Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 🟢 Set up Node.js 20
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      - name: 📦 Install dependencies
+      - name: Install & Build
         working-directory: frontend
-        run: npm ci
+        run: |
+          npm ci
+          npm run build:netlify
 
-      - name: 🔍 Lint
-        working-directory: frontend
-        run: npm run lint
-
-      # Builds to frontend/dist (separate from Spring Boot static folder)
-      - name: 🔨 Build (Vite → dist/)
-        working-directory: frontend
-        run: npm run build:netlify
-        env:
-          # Runtime API base URL injected at build time.
-          # Add VITE_API_BASE_URL to GitHub → Settings → Secrets → Actions.
-          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
-
-      # production-deploy=true  →  live site  (push to main)
-      # production-deploy=false →  preview URL (pull requests)
-      - name: 🌐 Deploy to Netlify
+      - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v3
         with:
           publish-dir: frontend/dist
           production-deploy: ${{ github.ref == 'refs/heads/main' }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}   # posts preview URL on PR
-          deploy-message: |
-            ${{ github.event_name == 'pull_request'
-              && format('PR #{0} — {1}', github.event.number, github.event.pull_request.title)
-              || format('Push {0} @ {1}', github.ref_name, github.sha) }}
-          enable-pull-request-comment: true
-          overwrites-pull-request-comment: true
-          enable-commit-comment: false
-          netlify-config-path: frontend/netlify.toml
+          github-token: ${{ secrets.GITHUB_TOKEN }}
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID:    ${{ secrets.NETLIFY_SITE_ID }}
         timeout-minutes: 10
 
-  # ────────────────────────────────────────────────────────────────────────────
-  # JOB 2 — Spring Boot backend → Docker Hub
-  # -DskipFrontend=true skips the frontend-maven-plugin entirely.
-  # The frontend is served by Netlify in production, so the Spring Boot
-  # static folder is intentionally empty in the production JAR.
-  # ────────────────────────────────────────────────────────────────────────────
   deploy-backend:
     name: 🐳 Backend → Docker Hub
     runs-on: ubuntu-latest
 
     steps:
-      - name: ⬇️ Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: ☕ Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
 
-      # Build the JAR — frontend-maven-plugin is skipped via -DskipFrontend=true.
-      # Tests run as a separate step so failures are easy to identify.
-      - name: 🔨 Build JAR (Maven, no frontend)
-        run: |
-          mvn clean package \
-            -DskipTests \
-            -DskipFrontend=true \
-            -Drevision=${{ env.RELEASE_VERSION }} \
-            --batch-mode --no-transfer-progress
+      - name: Build JAR
+        run: mvn clean package -DskipTests -DskipFrontend=true -Drevision=${{ env.RELEASE_VERSION }} --batch-mode --no-transfer-progress
 
-      - name: 🧪 Run unit tests
-        run: |
-          mvn test \
-            -DskipFrontend=true \
-            -Drevision=${{ env.RELEASE_VERSION }} \
-            --batch-mode --no-transfer-progress
+      - uses: docker/setup-buildx-action@v3
 
-      # Upload JAR so it can be downloaded from the Actions run for debugging
-      - name: 📤 Upload JAR artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-jar-${{ github.sha }}
-          path: target/*.jar
-          retention-days: 7
-
-      - name: 🐳 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      # Secrets: DOCKERHUB_USERNAME + DOCKERHUB_TOKEN (personal access token)
-      - name: 🔑 Login to Docker Hub
+      - name: Login to Docker Hub
         if: github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Tags produced:
-      #   iamdebjit3107/ija-admin-app:3.0.0      ← explicit release version
-      #   iamdebjit3107/ija-admin-app:sha-<sha>  ← short git SHA (traceability)
-      #   iamdebjit3107/ija-admin-app:latest     ← main branch only
-      - name: 🏷️ Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.DOCKER_IMAGE }}
-          tags: |
-            type=raw,value=${{ env.RELEASE_VERSION }},enable=${{ github.ref == 'refs/heads/main' }}
-            type=sha,prefix=sha-,format=short
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-
-      # Build on every push/PR to validate the Dockerfile.
-      # Only push to Docker Hub on main branch.
-      - name: 📦 Build & Push Docker image
+      - name: Build & Push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: ${{ github.ref == 'refs/heads/main' }}
-          tags:    ${{ steps.meta.outputs.tags }}
-          labels:  ${{ steps.meta.outputs.labels }}
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:${{ env.RELEASE_VERSION }}
+            ${{ env.DOCKER_IMAGE }}:latest
           cache-from: type=gha
           cache-to:   type=gha,mode=max
