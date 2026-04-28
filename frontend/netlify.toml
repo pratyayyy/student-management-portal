@@ -1,0 +1,35 @@
+# Netlify configuration for the React (Vite) frontend
+# -------------------------------------------------------
+
+[build]
+  # Directory (relative to repo root) that contains the frontend source
+  base    = "frontend"
+  # npm script used by Netlify / GitHub Actions
+  command = "npm run build:netlify"
+  # Output folder produced by the build script above
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# ── SPA fallback ──────────────────────────────────────────────────────────────
+# React Router uses client-side routing, so every path must serve index.html
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+# ── Security headers ──────────────────────────────────────────────────────────
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options        = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy        = "strict-origin-when-cross-origin"
+
+# Cache static assets aggressively (Vite fingerprints them)
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+

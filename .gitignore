@@ -34,3 +34,5 @@ build/
 
 ### React Frontend ###
 frontend/node_modules/
+# Netlify build output — never commit, always built in CI
+frontend/dist/
